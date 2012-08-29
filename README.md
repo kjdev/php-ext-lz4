@@ -2,6 +2,8 @@
 
 This extension allows LZ4.
 
+Documentation for LZ4 can be found at [» http://code.google.com/p/lz4/](http://code.google.com/p/lz4/).
+
 ## Build ##
 
     % phpize
@@ -106,3 +108,8 @@ Returns the decompressed data or FALSE if an error occurred.
     lz4_uncompress($data, 256, 6);
 
 ![uncompress-offset](/kjdev/php-ext-lz4/raw/master/docs/uncompress-offset.png)
+
+## Related ##
+
+* [code coverage report](http://gcov.at-ninja.jp/php-ext-lz4/)
+* [api document](http://api.at-ninja.jp/php-ext-lz4/)
