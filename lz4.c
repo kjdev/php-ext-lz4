@@ -149,6 +149,11 @@ static ZEND_FUNCTION(lz4_uncompress)
         memcpy(&data_len, Z_STRVAL_P(data), offset);
     }
 
+    if (data_len < 0) {
+        zend_error(E_WARNING, "lz4_uncompress : allocate size error");
+        RETURN_FALSE;
+    }
+
     output = (char *)emalloc(data_len + 1);
     if (!output) {
         zend_error(E_WARNING, "lz4_uncompress : memory error");
