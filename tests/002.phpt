@@ -19,7 +19,7 @@ var_dump(lz4_compress());
 echo "\n-- Testing lz4_compress() function with more than expected no. of arguments --\n";
 $data = 'string_val';
 $extra_arg = 10;
-var_dump(lz4_compress($data, false, $extra_arg));
+var_dump(lz4_compress($data, false, false, $extra_arg));
 
 class Tester {
     function Hello() {
@@ -42,7 +42,7 @@ bool(false)
 
 -- Testing lz4_compress() function with more than expected no. of arguments --
 
-Warning: lz4_compress() expects at most 2 parameters, 3 given in %s on line %d
+Warning: lz4_compress() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 
 -- Testing with incorrect parameters --

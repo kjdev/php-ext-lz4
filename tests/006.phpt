@@ -39,12 +39,12 @@ var_dump( bin2hex(lz4_compress($smallstring) ));
 --EXPECT--
 *** Testing lz4_compress() : hight functionality ***
 -- Compression --
-string(32) "58c17f9591f1120cd09f4dcccbb328fa"
+string(32) "5930843ebc3b37585a35c8b8b0172a89"
 int(0)
 -- Compression --
-string(58) "f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
+string(66) "1b000000f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
 int(0)
 
 -- Testing with no specified compression --
-string(58) "f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
+string(66) "1b000000f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
 ===Done===

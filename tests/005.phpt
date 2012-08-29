@@ -17,7 +17,7 @@ var_dump( lz4_uncompress() );
 echo "\n-- Testing lz4_uncompress() function with more than expected no. of arguments --\n";
 $data = 'string_val';
 $extra_arg = 10;
-var_dump( lz4_uncompress($data, -1, $extra_arg) );
+var_dump( lz4_uncompress($data, -1, -1, $extra_arg) );
 
 
 echo "\n-- Testing with incorrect arguments --\n";
@@ -45,7 +45,7 @@ bool(false)
 
 -- Testing lz4_uncompress() function with more than expected no. of arguments --
 
-Warning: lz4_uncompress() expects at most 2 parameters, 3 given in %s on line %d
+Warning: lz4_uncompress() expects at most 3 parameters, 4 given in %s on line %d
 bool(false)
 
 -- Testing with incorrect arguments --

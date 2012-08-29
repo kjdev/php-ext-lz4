@@ -1,5 +1,5 @@
 --TEST--
-TEST phpinfo() displays lz4 info
+Test phpinfo() displays lz4 info
 --SKIPIF--
 --FILE--
 <?php

@@ -22,6 +22,6 @@ var_dump(md5(lz4_compress($output)));
 *** Testing lz4_compress() : variation ***
 
 -- Testing multiple compression --
-string(32) "b70826de14e8fc0b06f2c9f3502132d1"
-string(32) "8325787a0f15fa24208da1dafde20250"
+string(32) "58a645dbce1fcaf21f488b597726efa1"
+string(32) "91336cf7e1da47b49f03cd666d586450"
 ===Done===

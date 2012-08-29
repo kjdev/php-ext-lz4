@@ -20,12 +20,11 @@ lz4.ini:
 * lz4\_compress — LZ4 compression
 * lz4\_uncompress — LZ4 decompression
 
-
 ### lz4\_compress — LZ4 compression ###
 
 #### Description ####
 
-string **lz4\_compress** ( string _$data_ [ , bool _$high_ = false ] )
+string **lz4\_compress** ( string _$data_ [ , bool _$high_ = false , string _$extra_ = NULL ] )
 
 LZ4 compression.
 
@@ -39,6 +38,10 @@ LZ4 compression.
 
   High Compression Mode.
 
+* _extra_
+
+  Prefix to compressed data.
+
 #### Return Values ####
 
 Returns the compressed data or FALSE if an error occurred.
@@ -48,7 +51,7 @@ Returns the compressed data or FALSE if an error occurred.
 
 #### Description ####
 
-string **lz4\_uncompress** ( string _$data_ [ , long _$maxsize_ ] )
+string **lz4\_uncompress** ( string _$data_ [ , long _$maxsize_ = -1 , long _$offset_ = -1 ] )
 
 LZ4 decompression.
 
@@ -62,6 +65,10 @@ LZ4 decompression.
 
   Allocate size output data.
 
+* _offset_
+
+  Offset to decompressed data.
+
 #### Return Values ####
 
 Returns the decompressed data or FALSE if an error occurred.
@@ -71,3 +78,31 @@ Returns the decompressed data or FALSE if an error occurred.
     $data = lz4_compress('test');
 
     lz4_uncompress($data);
+
+## Compress Data ##
+
+### Default ###
+
+    $data = lz4_compress('test')
+
+![compress-default](/raw/master/docs/compress-default.png)
+
+### Extra prefix data ###
+
+    $data = lz4_compress('test', false, 'PREFIX')
+
+![compress-extra](/raw/master/docs/compress-extra.png)
+
+## Uncompress Data ##
+
+### Default ###
+
+    lz4_uncompress($data);
+
+![uncompress-default](/raw/master/docs/uncompress-default.png)
+
+### Offset ###
+
+    lz4_uncompress($data, 256, 6);
+
+![uncompress-offset](/raw/master/docs/uncompress-offset.png)

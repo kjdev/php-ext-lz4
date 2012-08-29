@@ -18,11 +18,13 @@ static ZEND_FUNCTION(lz4_uncompress);
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, high)
+    ZEND_ARG_INFO(0, extra)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress, 0, 0, 1)
     ZEND_ARG_INFO(0, data)
     ZEND_ARG_INFO(0, max)
+    ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry lz4_functions[] = {
@@ -64,11 +66,15 @@ static ZEND_FUNCTION(lz4_compress)
 {
     zval *data;
     char *output;
-    int output_len;
+    int output_len, data_len;
     zend_bool high = 0;
+    char *extra = NULL;
+    int extra_len = -1;
+    int offset = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                              "z|b", &data, &high) == FAILURE) {
+                              "z|bs", &data, &high,
+                              &extra, &extra_len) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -78,22 +84,37 @@ static ZEND_FUNCTION(lz4_compress)
         RETURN_FALSE;
     }
 
-    output = (char *)emalloc(LZ4_compressBound(Z_STRLEN_P(data)));
+    if (extra && extra_len > 0) {
+        offset = extra_len;
+    } else {
+        offset = sizeof(int);
+    }
+
+    data_len = Z_STRLEN_P(data);
+
+    output = (char *)emalloc(LZ4_compressBound(data_len) + offset);
     if (!output) {
         zend_error(E_WARNING, "lz4_compress : memory error");
         RETURN_FALSE;
     }
 
-    if (high) {
-        output_len = LZ4_compressHC(Z_STRVAL_P(data), output, Z_STRLEN_P(data));
+    if (extra && extra_len > 0) {
+        memcpy(output, extra, offset);
     } else {
-        output_len = LZ4_compress(Z_STRVAL_P(data), output, Z_STRLEN_P(data));
+        /* Set the data length */
+        memcpy(output, &data_len, offset);
+    }
+
+    if (high) {
+        output_len = LZ4_compressHC(Z_STRVAL_P(data), output + offset, data_len);
+    } else {
+        output_len = LZ4_compress(Z_STRVAL_P(data), output + offset, data_len);
     }
 
     if (output_len <= 0) {
         RETVAL_FALSE;
     } else {
-        RETVAL_STRINGL(output, output_len, 1);
+        RETVAL_STRINGL(output, output_len + offset, 1);
     }
 
     efree(output);
@@ -102,13 +123,12 @@ static ZEND_FUNCTION(lz4_compress)
 static ZEND_FUNCTION(lz4_uncompress)
 {
     zval *data;
-    int output_len;
+    int output_len, data_len;
     char *output;
-    long max_size = -1;
-    int i = 1;
+    long max_size = -1, offset = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                              "z|l", &data, &max_size) == FAILURE) {
+                              "z|ll", &data, &max_size, &offset) == FAILURE) {
         RETURN_FALSE;
     }
 
@@ -118,19 +138,27 @@ static ZEND_FUNCTION(lz4_uncompress)
         RETURN_FALSE;
     }
 
-    /* TODO: output allocate size */
-    if (max_size <= 0) {
-        max_size = Z_STRLEN_P(data) * 3;
+    if (max_size > 0) {
+        data_len = max_size;
+        if (!offset) {
+            offset = sizeof(int);
+        }
+    } else {
+        /* Get data length */
+        offset = sizeof(int);
+        memcpy(&data_len, Z_STRVAL_P(data), offset);
     }
 
-    output = (char *)emalloc(max_size+1);
+    output = (char *)emalloc(data_len + 1);
     if (!output) {
         zend_error(E_WARNING, "lz4_uncompress : memory error");
         RETURN_FALSE;
     }
 
-    output_len = LZ4_uncompress_unknownOutputSize(Z_STRVAL_P(data), output,
-                                                  Z_STRLEN_P(data), max_size);
+    output_len = LZ4_uncompress_unknownOutputSize(Z_STRVAL_P(data) + offset,
+                                                  output,
+                                                  Z_STRLEN_P(data) - offset,
+                                                  data_len);
 
     if (output_len <= 0) {
         zend_error(E_WARNING, "lz4_uncompress : data error");
