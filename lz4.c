@@ -6,6 +6,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "php_verdep.h"
 #include "php_lz4.h"
 
 /* lz4 */
