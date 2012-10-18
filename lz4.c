@@ -27,7 +27,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress, 0, 0, 1)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-static const zend_function_entry lz4_functions[] = {
+static zend_function_entry lz4_functions[] = {
     ZEND_FE(lz4_compress, arginfo_lz4_compress)
     ZEND_FE(lz4_uncompress, arginfo_lz4_uncompress)
     ZEND_FE_END
