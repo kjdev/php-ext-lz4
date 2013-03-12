@@ -89,13 +89,13 @@ Returns the decompressed data or FALSE if an error occurred.
 
     $data = lz4_compress('test')
 
-![compress-default](/kjdev/php-ext-lz4/raw/master/docs/compress-default.png)
+![compress-default](docs/compress-default.png)
 
 ### Extra prefix data ###
 
     $data = lz4_compress('test', false, 'PREFIX')
 
-![compress-extra](/kjdev/php-ext-lz4/raw/master/docs/compress-extra.png)
+![compress-extra](docs/compress-extra.png)
 
 ## Uncompress Data ##
 
@@ -103,13 +103,13 @@ Returns the decompressed data or FALSE if an error occurred.
 
     lz4_uncompress($data);
 
-![uncompress-default](/kjdev/php-ext-lz4/raw/master/docs/uncompress-default.png)
+![uncompress-default](docs/uncompress-default.png)
 
 ### Offset ###
 
     lz4_uncompress($data, 256, 6);
 
-![uncompress-offset](/kjdev/php-ext-lz4/raw/master/docs/uncompress-offset.png)
+![uncompress-offset](docs/uncompress-offset.png)
 
 ## Related ##
 
