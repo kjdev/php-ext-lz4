@@ -113,5 +113,5 @@ Returns the decompressed data or FALSE if an error occurred.
 
 ## Related ##
 
-* [code coverage report](http://gcov.at-ninja.jp/php-ext-lz4/)
-* [api document](http://api.at-ninja.jp/php-ext-lz4/)
+* [code coverage report](http://gcov.at-ninja.jp.2-t.jp/6Z)
+* [api document](http://api.at-ninja.jp.2-t.jp/70)
