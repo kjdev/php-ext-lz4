@@ -1,0 +1,7 @@
+Doxyfile
+compress.php
+decompress.php
+lz4.php
+lz4.doc
+coverage-footer.html
+doxygen-footer.html
