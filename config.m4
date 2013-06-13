@@ -26,7 +26,7 @@ PHP_ARG_ENABLE(lz4, whether to enable lz4 support,
 
 if test "$PHP_LZ4" != "no"; then
 
-  PHP_NEW_EXTENSION(lz4, lz4.c lz4/lz4.c lz4/lz4hc.c, $ext_shared)
+  PHP_NEW_EXTENSION(lz4, lz4.c lz4/lz4.c lz4/lz4hc.c lz4/xxhash.c, $ext_shared)
 
   ifdef([PHP_INSTALL_HEADERS],
   [
