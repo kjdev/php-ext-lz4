@@ -35,3 +35,12 @@ if test "$PHP_LZ4" != "no"; then
     PHP_ADD_MAKEFILE_FRAGMENT
   ])
 fi
+
+dnl coverage
+PHP_ARG_ENABLE(coverage, whether to enable coverage support,
+[  --enable-coverage     Enable coverage support], no, no)
+
+if test "$PHP_COVERAGE" != "no"; then
+    EXTRA_CFLAGS="--coverage"
+    PHP_SUBST(EXTRA_CFLAGS)
+fi

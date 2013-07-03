@@ -8,8 +8,23 @@ php:
 env:
   - REPORT_EXIT_STATUS=1 NO_INTERACTION=1
 
+before_install:
+  - sudo apt-get install -qq gawk
+  - curl https://raw.github.com/gist/5624363 > coveralls.sh 2> /dev/null
+  - curl https://raw.github.com/gist/5631566 > libtool_patch.sh 2> /dev/null
+
+before_script:
+  - phpize && ./configure --enable-coverage
+  - bash libtool_patch.sh && extras/make.sh
+
 before_script:
   - phpize && ./configure && make
 
 script:
   - make test | tee test-output.txt && grep 'TEST SUMMARY$' test-output.txt > /dev/null ; test $? '!=' 0
+
+after_success:
+  - bash coveralls.sh -s lz4.c -g .libs
+
+after_failure:
+  - for FILE in `find ./tests -name '*.diff'`; do echo echo $FILE; cat $FILE; echo; done
