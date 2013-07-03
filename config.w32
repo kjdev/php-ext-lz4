@@ -1,0 +1,7 @@
+ARG_ENABLE("lz4", "enable lz4 support", "no");
+
+if (PHP_LZ4 != "no") {
+   EXTENSION("lz4", "lz4.c", PHP_LZ4_SHARED, "");
+   ADD_SOURCES(configure_module_dirname + "/lz4", "lz4.c lz4hc.c xxhash.c", "lz4");
+   PHP_INSTALL_HEADERS("ext/lz4/", "php_lz4.h");
+}
