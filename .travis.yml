@@ -15,10 +15,7 @@ before_install:
 
 before_script:
   - phpize && ./configure --enable-coverage
-  - bash libtool_patch.sh && extras/make.sh
-
-before_script:
-  - phpize && ./configure && make
+  - bash libtool_patch.sh && make
 
 script:
   - make test | tee test-output.txt && grep 'TEST SUMMARY$' test-output.txt > /dev/null ; test $? '!=' 0
