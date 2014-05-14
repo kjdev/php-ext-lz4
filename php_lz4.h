@@ -24,7 +24,7 @@
 #ifndef PHP_LZ4_H
 #define PHP_LZ4_H
 
-#define LZ4_EXT_VERSION "0.1.1"
+#define LZ4_EXT_VERSION "0.2.0"
 
 extern zend_module_entry lz4_module_entry;
 #define phpext_lz4_ptr &lz4_module_entry

@@ -58,9 +58,13 @@ static zend_function_entry lz4_functions[] = {
 
 ZEND_MINFO_FUNCTION(lz4)
 {
+    char buffer[128];
     php_info_print_table_start();
     php_info_print_table_row(2, "LZ4 support", "enabled");
     php_info_print_table_row(2, "Extension Version", LZ4_EXT_VERSION);
+    snprintf(buffer, 128, "%d.%d.%d",
+             LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE);
+    php_info_print_table_row(2, "Interface Version", buffer);
     php_info_print_table_end();
 }
 
@@ -146,7 +150,7 @@ static ZEND_FUNCTION(lz4_compress)
 static ZEND_FUNCTION(lz4_uncompress)
 {
     zval *data;
-    int output_len, data_len;
+    int output_len, data_size;
     char *output;
     long max_size = -1, offset = 0;
 
@@ -162,31 +166,31 @@ static ZEND_FUNCTION(lz4_uncompress)
     }
 
     if (max_size > 0) {
-        data_len = max_size;
+        data_size = max_size;
         if (!offset) {
             offset = sizeof(int);
         }
     } else {
         /* Get data length */
         offset = sizeof(int);
-        memcpy(&data_len, Z_STRVAL_P(data), offset);
+        memcpy(&data_size, Z_STRVAL_P(data), offset);
     }
 
-    if (data_len < 0) {
+    if (data_size < 0) {
         zend_error(E_WARNING, "lz4_uncompress : allocate size error");
         RETURN_FALSE;
     }
 
-    output = (char *)emalloc(data_len + 1);
+    output = (char *)emalloc(data_size + 1);
     if (!output) {
         zend_error(E_WARNING, "lz4_uncompress : memory error");
         RETURN_FALSE;
     }
 
-    output_len = LZ4_uncompress_unknownOutputSize(Z_STRVAL_P(data) + offset,
-                                                  output,
-                                                  Z_STRLEN_P(data) - offset,
-                                                  data_len);
+    output_len = LZ4_decompress_safe(Z_STRVAL_P(data) + offset,
+                                     output,
+                                     Z_STRLEN_P(data) - offset,
+                                     data_size);
 
     if (output_len <= 0) {
         zend_error(E_WARNING, "lz4_uncompress : data error");

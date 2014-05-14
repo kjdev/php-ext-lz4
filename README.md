@@ -114,8 +114,3 @@ Returns the decompressed data or FALSE if an error occurred.
     lz4_uncompress($data, 256, 6);
 
 ![uncompress-offset](docs/uncompress-offset.png)
-
-## Related ##
-
-* [code coverage report](http://gcov.at-ninja.jp.2-t.jp/6Z)
-* [api document](http://api.at-ninja.jp.2-t.jp/70)
