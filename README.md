@@ -13,10 +13,6 @@ Documentation for LZ4 can be found at [» http://code.google.com/p/lz4/](http://
     % make
     % make install
 
-### Windows binary ###
-
-* [» PHP 5.4.16 VC9 extension](http://kjdev.sdbx.jp/windows)
-
 ## Configration ##
 
 lz4.ini:
