@@ -153,6 +153,7 @@ static ZEND_FUNCTION(lz4_uncompress)
     int output_len, data_size;
     char *output;
     long max_size = -1, offset = 0;
+    void *len;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
                               "z|ll", &data, &max_size, &offset) == FAILURE) {
@@ -181,7 +182,7 @@ static ZEND_FUNCTION(lz4_uncompress)
         RETURN_FALSE;
     }
 
-    output = (char *)emalloc(data_size + 1);
+    output = (char *)malloc(data_size + 1);
     if (!output) {
         zend_error(E_WARNING, "lz4_uncompress : memory error");
         RETURN_FALSE;
@@ -199,5 +200,5 @@ static ZEND_FUNCTION(lz4_uncompress)
         RETVAL_STRINGL(output, output_len, 1);
     }
 
-    efree(output);
+    free(output);
 }
