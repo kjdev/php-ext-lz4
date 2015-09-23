@@ -141,7 +141,11 @@ static ZEND_FUNCTION(lz4_compress)
     if (output_len <= 0) {
         RETVAL_FALSE;
     } else {
+#if ZEND_MODULE_API_NO >= 20141001
+        RETVAL_STRINGL(output, output_len + offset);
+#else
         RETVAL_STRINGL(output, output_len + offset, 1);
+#endif
     }
 
     efree(output);
@@ -197,7 +201,11 @@ static ZEND_FUNCTION(lz4_uncompress)
         zend_error(E_WARNING, "lz4_uncompress : data error");
         RETVAL_FALSE;
     } else {
+#if ZEND_MODULE_API_NO >= 20141001
+        RETVAL_STRINGL(output, output_len);
+#else
         RETVAL_STRINGL(output, output_len, 1);
+#endif
     }
 
     free(output);
