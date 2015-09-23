@@ -17,6 +17,6 @@ var_dump(strcmp(lz4_uncompress($output, strlen($data), strlen($extras)), $data))
 ?>
 ===Done===
 --EXPECT--
-string(32) "19a1e65eab6f876ad28ff24b164f4ac2"
+string(32) "5930843ebc3b37585a35c8b8b0172a89"
 int(0)
 ===Done===
