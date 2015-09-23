@@ -1,38 +1,39 @@
-# LZ4 Extension for PHP #
+# LZ4 Extension for PHP
 
 [![Build Status](https://secure.travis-ci.org/kjdev/php-ext-lz4.png?branch=master)](http://travis-ci.org/kjdev/php-ext-lz4)
 
 This extension allows LZ4.
 
-Documentation for LZ4 can be found at [» http://code.google.com/p/lz4/](http://code.google.com/p/lz4/).
+Documentation for LZ4 can be found at
+[» https://github.com/Cyan4973/lz4](https://github.com/Cyan4973/lz4).
 
-## Build ##
+## Build
 
     % phpize
     % ./configure
     % make
     % make install
 
-## Configration ##
+## Configration
 
 lz4.ini:
 
     extension=lz4.so
 
-## Function ##
+## Function
 
 * lz4\_compress — LZ4 compression
 * lz4\_uncompress — LZ4 decompression
 
-### lz4\_compress — LZ4 compression ###
+### lz4\_compress — LZ4 compression
 
-#### Description ####
+#### Description
 
 string **lz4\_compress** ( string _$data_ [ , bool _$high_ = false , string _$extra_ = NULL ] )
 
 LZ4 compression.
 
-#### Pameters ####
+#### Pameters
 
 * _data_
 
@@ -46,20 +47,20 @@ LZ4 compression.
 
   Prefix to compressed data.
 
-#### Return Values ####
+#### Return Values
 
 Returns the compressed data or FALSE if an error occurred.
 
 
-### lz4\_uncompress — LZ4 decompression ###
+### lz4\_uncompress — LZ4 decompression
 
-#### Description ####
+#### Description
 
 string **lz4\_uncompress** ( string _$data_ [ , long _$maxsize_ = -1 , long _$offset_ = -1 ] )
 
 LZ4 decompression.
 
-#### Pameters ####
+#### Pameters
 
 * _data_
 
@@ -73,39 +74,39 @@ LZ4 decompression.
 
   Offset to decompressed data.
 
-#### Return Values ####
+#### Return Values
 
 Returns the decompressed data or FALSE if an error occurred.
 
-## Examples ##
+## Examples
 
     $data = lz4_compress('test');
 
     lz4_uncompress($data);
 
-## Compress Data ##
+## Compress Data
 
-### Default ###
+### Default
 
     $data = lz4_compress('test')
 
 ![compress-default](docs/compress-default.png)
 
-### Extra prefix data ###
+### Extra prefix data
 
     $data = lz4_compress('test', false, 'PREFIX')
 
 ![compress-extra](docs/compress-extra.png)
 
-## Uncompress Data ##
+## Uncompress Data
 
-### Default ###
+### Default
 
     lz4_uncompress($data);
 
 ![uncompress-default](docs/uncompress-default.png)
 
-### Offset ###
+### Offset
 
     lz4_uncompress($data, 256, 6);
 
