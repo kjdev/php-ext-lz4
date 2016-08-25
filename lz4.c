@@ -97,7 +97,11 @@ static ZEND_FUNCTION(lz4_compress)
     zend_bool high = 0;
     char *extra = NULL;
     int extra_len = -1;
+#if ZEND_MODULE_API_NO >= 20141001
+    size_t offset = 0;
+#else
     int offset = 0;
+#endif
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
                               "z|bs", &data, &high,
