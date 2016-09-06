@@ -14,6 +14,8 @@ Documentation for LZ4 can be found at
     % make
     % make install
 
+> use system library: `./configure --with-lz4-includedir=/usr`
+
 ## Configration
 
 lz4.ini:

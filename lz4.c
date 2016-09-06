@@ -32,8 +32,8 @@
 #include "php_lz4.h"
 
 /* lz4 */
-#include "lz4/lz4.h"
-#include "lz4/lz4hc.h"
+#include "lz4.h"
+#include "lz4hc.h"
 
 static ZEND_FUNCTION(lz4_compress);
 static ZEND_FUNCTION(lz4_uncompress);
@@ -62,9 +62,13 @@ ZEND_MINFO_FUNCTION(lz4)
     php_info_print_table_start();
     php_info_print_table_row(2, "LZ4 support", "enabled");
     php_info_print_table_row(2, "Extension Version", LZ4_EXT_VERSION);
-    snprintf(buffer, 128, "%d.%d.%d",
+#ifdef HAVE_LIBSNAPPY
+    snprintf(buffer, sizeof(buffer), "%s", "system library");
+#else
+    snprintf(buffer, sizeof(buffer), "%d.%d.%d",
              LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE);
-    php_info_print_table_row(2, "Interface Version", buffer);
+#endif
+    php_info_print_table_row(2, "LZ4 Version", buffer);
     php_info_print_table_end();
 }
 

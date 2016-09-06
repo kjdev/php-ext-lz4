@@ -24,16 +24,46 @@ fi
 PHP_ARG_ENABLE(lz4, whether to enable lz4 support,
 [  --enable-lz4           Enable lz4 support])
 
+PHP_ARG_WITH(lz4-includedir, for lz4 header,
+[  --with-lz4-includedir=DIR  lz4 header files], no, no)
+
 if test "$PHP_LZ4" != "no"; then
 
-  PHP_NEW_EXTENSION(lz4, lz4.c lz4/lz4.c lz4/lz4hc.c lz4/xxhash.c, $ext_shared)
+  AC_MSG_CHECKING([searching for liblz4])
 
-  ifdef([PHP_INSTALL_HEADERS],
-  [
-    PHP_INSTALL_HEADERS([ext/lz4/], [php_lz4.h])
-  ], [
-    PHP_ADD_MAKEFILE_FRAGMENT
-  ])
+  if test "$PHP_LZ4_INCLUDEDIR" != "no"; then
+    for i in $PHP_LZ4_INCLUDEDIR /usr/local /usr; do
+      if test -r $i/include/lz4.h; then
+        LIBLZ4_CFLAGS="-I$i/include"
+        LIBLZ4_LIBDIR="$i/$PHP_LIBDIR"
+        AC_MSG_RESULT(found in $i)
+        break
+      fi
+    done
+    if test -z "$LIBLZ4_LIBDIR"; then
+      AC_MSG_RESULT(not found)
+      AC_MSG_ERROR(Please reinstall the lz4 library distribution)
+    fi
+    PHP_CHECK_LIBRARY(lz4, LZ4_compress,
+    [
+      PHP_ADD_LIBRARY_WITH_PATH(lz4, $LIBLZ4_LIBDIR, LZ4_SHARED_LIBADD)
+      AC_DEFINE(HAVE_LIBLZ4,1,[ ])
+    ], [
+      AC_MSG_ERROR(could not find usable liblz4)
+    ], [
+      -L$LIBLZ4_LIBDIR
+    ])
+
+    PHP_SUBST(LZ4_SHARED_LIBADD)
+    PHP_NEW_EXTENSION(lz4, lz4.c, $ext_shared,, $LIBLZ4_CFLAGS)
+  else
+    AC_MSG_RESULT(use bundled version)
+
+    PHP_NEW_EXTENSION(lz4, lz4.c lz4/lz4.c lz4/lz4hc.c lz4/xxhash.c, $ext_shared)
+
+    PHP_ADD_BUILD_DIR($ext_builddir/lz4, 1)
+    PHP_ADD_INCLUDE([$ext_srcdir/lz4])
+  fi
 fi
 
 dnl coverage
