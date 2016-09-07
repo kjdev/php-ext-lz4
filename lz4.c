@@ -100,12 +100,12 @@ static ZEND_FUNCTION(lz4_compress)
     int output_len, data_len;
     zend_bool high = 0;
     char *extra = NULL;
-    int extra_len = -1;
 #if ZEND_MODULE_API_NO >= 20141001
-    size_t offset = 0;
+    size_t extra_len = -1;
 #else
-    int offset = 0;
+    int extra_len = -1;
 #endif
+    int offset = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
                               "z|bs", &data, &high,
@@ -164,8 +164,11 @@ static ZEND_FUNCTION(lz4_uncompress)
     zval *data;
     int output_len, data_size;
     char *output;
+#if ZEND_MODULE_API_NO >= 20141001
+    zend_long max_size = -1, offset = 0;
+#else
     long max_size = -1, offset = 0;
-    void *len;
+#endif
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
                               "z|ll", &data, &max_size, &offset) == FAILURE) {
