@@ -62,7 +62,7 @@ ZEND_MINFO_FUNCTION(lz4)
     php_info_print_table_start();
     php_info_print_table_row(2, "LZ4 support", "enabled");
     php_info_print_table_row(2, "Extension Version", LZ4_EXT_VERSION);
-#ifdef HAVE_LIBSNAPPY
+#ifdef HAVE_LIBLZ4
     snprintf(buffer, sizeof(buffer), "%s", "system library");
 #else
     snprintf(buffer, sizeof(buffer), "%d.%d.%d",
