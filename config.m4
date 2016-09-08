@@ -59,10 +59,10 @@ if test "$PHP_LZ4" != "no"; then
   else
     AC_MSG_RESULT(use bundled version)
 
-    PHP_NEW_EXTENSION(lz4, lz4.c lz4/lz4.c lz4/lz4hc.c lz4/xxhash.c, $ext_shared)
+    PHP_NEW_EXTENSION(lz4, lz4.c lz4/lib/lz4.c lz4/lib/lz4hc.c lz4/lib/xxhash.c, $ext_shared)
 
-    PHP_ADD_BUILD_DIR($ext_builddir/lz4, 1)
-    PHP_ADD_INCLUDE([$ext_srcdir/lz4])
+    PHP_ADD_BUILD_DIR($ext_builddir/lz4/lib, 1)
+    PHP_ADD_INCLUDE([$ext_srcdir/lz4/lib])
   fi
 fi
 

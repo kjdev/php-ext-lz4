@@ -9,6 +9,8 @@ Documentation for LZ4 can be found at
 
 ## Build
 
+    % git clone --recursive --depth=1 https://github.com/kjdev/php-ext-lz4.git
+    % cd php-ext-lz4
     % phpize
     % ./configure
     % make
