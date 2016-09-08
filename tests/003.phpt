@@ -1,6 +1,7 @@
 --TEST--
 Test lz4_compress() function : variation
 --SKIPIF--
+<?php if (PHP_INT_SIZE==4) die("skip 64bits only"); ?>
 --FILE--
 <?php
 if (!extension_loaded('lz4')) {
