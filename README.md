@@ -33,7 +33,7 @@ lz4.ini:
 
 #### Description
 
-string **lz4\_compress** ( string _$data_ [ , bool _$high_ = false , string _$extra_ = NULL ] )
+string **lz4\_compress** ( string _$data_ [ , int _$level_ = 0 , string _$extra_ = NULL ] )
 
 LZ4 compression.
 
@@ -43,9 +43,10 @@ LZ4 compression.
 
   The string to compress.
 
-* _high_
+* _level_
 
-  High Compression Mode.
+  The level of compression (1-16, Recommended values are between 4 and 9).
+  (Default to 0, Not High Compression Mode.)
 
 * _extra_
 

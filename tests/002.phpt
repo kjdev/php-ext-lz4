@@ -19,7 +19,7 @@ var_dump(lz4_compress());
 echo "\n-- Testing lz4_compress() function with more than expected no. of arguments --\n";
 $data = 'string_val';
 $extra_arg = 10;
-var_dump(lz4_compress($data, false, false, $extra_arg));
+var_dump(lz4_compress($data, 6, false, $extra_arg));
 
 class Tester {
     function Hello() {

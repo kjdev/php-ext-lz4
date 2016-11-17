@@ -30,22 +30,14 @@ echo "-- Compression --\n";
 $output = lz4_compress($smallstring);
 var_dump(bin2hex($output));
 var_dump(strcmp(lz4_uncompress($output), $smallstring));
-
-// Calling gzcompress() with mandatory arguments
-echo "\n-- Testing with no specified compression --\n";
-var_dump( bin2hex(lz4_compress($smallstring) ));
-
 ?>
 ===Done===
 --EXPECT--
 *** Testing lz4_compress() : basic functionality ***
 -- Compression --
-string(32) "3fad1911784ea233a021cd95ce3a6fec"
+string(32) "58a645dbce1fcaf21f488b597726efa1"
 int(0)
 -- Compression --
 string(66) "1b000000f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
 int(0)
-
--- Testing with no specified compression --
-string(66) "1b000000f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
 ===Done===

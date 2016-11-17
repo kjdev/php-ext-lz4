@@ -11,12 +11,12 @@ include(dirname(__FILE__) . '/data.inc');
 
 $extras = 'TEST';
 
-$output = lz4_compress($data, $extras);
+$output = lz4_compress($data, 6, $extras);
 var_dump(md5($output));
 var_dump(strcmp(lz4_uncompress($output, strlen($data), strlen($extras)), $data));
 ?>
 ===Done===
 --EXPECT--
-string(32) "5930843ebc3b37585a35c8b8b0172a89"
+string(32) "da98aa033ad0e050cc93ac36f6d41cad"
 int(0)
 ===Done===

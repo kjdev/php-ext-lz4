@@ -40,7 +40,7 @@ static ZEND_FUNCTION(lz4_uncompress);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
     ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, high)
+    ZEND_ARG_INFO(0, level)
     ZEND_ARG_INFO(0, extra)
 ZEND_END_ARG_INFO()
 
@@ -97,8 +97,9 @@ static ZEND_FUNCTION(lz4_compress)
 {
     zval *data;
     char *output;
-    int output_len, data_len;
-    zend_bool high = 0;
+    int output_len, data_len, dst_len;
+    long level = 0;
+    long maxLevel = (long)LZ4HC_MAX_CLEVEL;
     char *extra = NULL;
 #if ZEND_MODULE_API_NO >= 20141001
     size_t extra_len = -1;
@@ -108,7 +109,7 @@ static ZEND_FUNCTION(lz4_compress)
     int offset = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                              "z|bs", &data, &high,
+                              "z|ls", &data, &level,
                               &extra, &extra_len) == FAILURE) {
         RETURN_FALSE;
     }
@@ -126,8 +127,9 @@ static ZEND_FUNCTION(lz4_compress)
     }
 
     data_len = Z_STRLEN_P(data);
+    dst_len = LZ4_compressBound(data_len) + offset;
 
-    output = (char *)emalloc(LZ4_compressBound(data_len) + offset);
+    output = (char *)emalloc(dst_len);
     if (!output) {
         zend_error(E_WARNING, "lz4_compress : memory error");
         RETURN_FALSE;
@@ -140,10 +142,16 @@ static ZEND_FUNCTION(lz4_compress)
         memcpy(output, &data_len, offset);
     }
 
-    if (high) {
-        output_len = LZ4_compressHC(Z_STRVAL_P(data), output + offset, data_len);
+    if (level == 0) {
+        output_len = LZ4_compress_default(Z_STRVAL_P(data), output + offset, data_len, dst_len - offset - 1);
     } else {
-        output_len = LZ4_compress(Z_STRVAL_P(data), output + offset, data_len);
+        if (level > maxLevel || level < 0) {
+            zend_error(E_WARNING, "lz4_compress: compression level (%ld)"
+                       " must be within 1..%d", level, maxLevel);
+            efree(output);
+            RETURN_FALSE;
+        }
+        output_len = LZ4_compress_HC(Z_STRVAL_P(data), output + offset, data_len, dst_len - offset - 1, level);
     }
 
     if (output_len <= 0) {
@@ -209,7 +217,7 @@ static ZEND_FUNCTION(lz4_uncompress)
                                      data_size);
 
     if (output_len <= 0) {
-        zend_error(E_WARNING, "lz4_uncompress : data error");
+        //zend_error(E_WARNING, "lz4_uncompress : data error");
         RETVAL_FALSE;
     } else {
 #if ZEND_MODULE_API_NO >= 20141001
