@@ -9,6 +9,8 @@ if (!extension_loaded('lz4')) {
 
 include(dirname(__FILE__) . '/data.inc');
 
+error_reporting(0);
+
 function check_compress($data, $level)
 {
   $output = (string)lz4_compress($data, $level);
@@ -50,10 +52,6 @@ check_compress($data, -1);
 15 -- 2686 -- true
 16 -- 2686 -- true
 *** Invalid Compression Level ***
-
-Warning: lz4_compress: compression level (100) must be within 1..16 in %s on line %d
 100 -- 0 -- false
-
-Warning: lz4_compress: compression level (-1) must be within 1..16 in %s on line %d
 -1 -- 0 -- false
 ===Done===

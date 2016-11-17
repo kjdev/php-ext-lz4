@@ -217,7 +217,7 @@ static ZEND_FUNCTION(lz4_uncompress)
                                      data_size);
 
     if (output_len <= 0) {
-        //zend_error(E_WARNING, "lz4_uncompress : data error");
+        zend_error(E_WARNING, "lz4_uncompress : data error");
         RETVAL_FALSE;
     } else {
 #if ZEND_MODULE_API_NO >= 20141001

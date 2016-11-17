@@ -24,6 +24,8 @@ var_dump($output);
 === Compress and Uncompress ===
 bool(true)
 === Uncompress ===
+
+Warning: lz4_uncompress : data error in %s on line %d
 bool(false)
 bool(false)
 ===Done===
