@@ -99,7 +99,7 @@ static ZEND_FUNCTION(lz4_compress)
     char *output;
     int output_len, data_len, dst_len;
     long level = 0;
-    long maxLevel = (long)LZ4HC_MAX_CLEVEL;
+    long maxLevel = (long)LZ4HC_CLEVEL_MAX;
     char *extra = NULL;
 #if ZEND_MODULE_API_NO >= 20141001
     size_t extra_len = -1;

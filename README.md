@@ -45,7 +45,7 @@ LZ4 compression.
 
 * _level_
 
-  The level of compression (1-16, Recommended values are between 4 and 9).
+  The level of compression (1-12, Recommended values are between 4 and 9).
   (Default to 0, Not High Compression Mode.)
 
 * _extra_
