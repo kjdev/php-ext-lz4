@@ -45,8 +45,8 @@ check_compress($data, -1);
 8 -- 2686 -- true
 9 -- 2686 -- true
 10 -- 2686 -- true
-11 -- 2683 -- true
-12 -- 2683 -- true
+11 -- 26%d -- true
+12 -- 26%d -- true
 *** Invalid Compression Level ***
 100 -- 0 -- false
 -1 -- 0 -- false
