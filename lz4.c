@@ -48,6 +48,19 @@
 #define PHP_LZ4_CLEVEL_MAX 16
 #endif
 
+#if defined(LZ4HC_CLEVEL_MIN)
+/* version >= 1.7.5 */
+#define PHP_LZ4_CLEVEL_MIN LZ4HC_CLEVEL_MIN
+
+#elif defined (LZ4HC_MIN_CLEVEL)
+/* version >= 1.7.3 */
+#define PHP_LZ4_CLEVEL_MIN LZ4HC_MIN_CLEVEL
+
+#else
+/* older versions */
+#define PHP_LZ4_CLEVEL_MIN 3
+#endif
+
 static ZEND_FUNCTION(lz4_compress);
 static ZEND_FUNCTION(lz4_uncompress);
 
@@ -72,7 +85,9 @@ static zend_function_entry lz4_functions[] = {
 
 static PHP_MINIT_FUNCTION(lz4)
 {
+    REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MIN", PHP_LZ4_CLEVEL_MIN, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MAX", PHP_LZ4_CLEVEL_MAX, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_VERSION",    LZ4_versionNumber(), CONST_CS | CONST_PERSISTENT);
 
     return SUCCESS;
 }
