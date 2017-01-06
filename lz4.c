@@ -35,6 +35,32 @@
 #include "lz4.h"
 #include "lz4hc.h"
 
+#if defined(LZ4HC_CLEVEL_MAX)
+/* version >= 1.7.5 */
+#define PHP_LZ4_CLEVEL_MAX LZ4HC_CLEVEL_MAX
+
+#elif defined (LZ4HC_MAX_CLEVEL)
+/* version >= 1.7.3 */
+#define PHP_LZ4_CLEVEL_MAX LZ4HC_MAX_CLEVEL
+
+#else
+/* older versions */
+#define PHP_LZ4_CLEVEL_MAX 16
+#endif
+
+#if defined(LZ4HC_CLEVEL_MIN)
+/* version >= 1.7.5 */
+#define PHP_LZ4_CLEVEL_MIN LZ4HC_CLEVEL_MIN
+
+#elif defined (LZ4HC_MIN_CLEVEL)
+/* version >= 1.7.3 */
+#define PHP_LZ4_CLEVEL_MIN LZ4HC_MIN_CLEVEL
+
+#else
+/* older versions */
+#define PHP_LZ4_CLEVEL_MIN 3
+#endif
+
 static ZEND_FUNCTION(lz4_compress);
 static ZEND_FUNCTION(lz4_uncompress);
 
@@ -56,19 +82,42 @@ static zend_function_entry lz4_functions[] = {
     ZEND_FE_END
 };
 
+
+static PHP_MINIT_FUNCTION(lz4)
+{
+    REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MIN", PHP_LZ4_CLEVEL_MIN, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MAX", PHP_LZ4_CLEVEL_MAX, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_VERSION",    LZ4_versionNumber(), CONST_CS | CONST_PERSISTENT);
+
+    return SUCCESS;
+}
+
 ZEND_MINFO_FUNCTION(lz4)
 {
-    char buffer[128];
     php_info_print_table_start();
     php_info_print_table_row(2, "LZ4 support", "enabled");
     php_info_print_table_row(2, "Extension Version", LZ4_EXT_VERSION);
-#ifdef HAVE_LIBLZ4
-    snprintf(buffer, sizeof(buffer), "%s", "system library");
-#else
+#if !defined(HAVE_LIBLZ4)
+    /* Bundled library */
+    php_info_print_table_row(2, "LZ4 Version", LZ4_versionString());
+#elif defined(LZ4_VERSION_MAJOR)
+    /* Recent system library */
+    {
+    char buffer[128];
+
     snprintf(buffer, sizeof(buffer), "%d.%d.%d",
              LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE);
+    php_info_print_table_row(2, "LZ4 headers Version", buffer);
+
+    /* LZ4_versionString is not usable, see https://github.com/lz4/lz4/issues/301 */
+    snprintf(buffer, sizeof(buffer), "%d.%d.%d",
+             LZ4_versionNumber()/10000, (LZ4_versionNumber()/100)%100, LZ4_versionNumber()%100);
+    php_info_print_table_row(2, "LZ4 library Version", buffer);
+    }
+#else
+    /* Old system library */
+    php_info_print_table_row(2, "LZ4 Version", "system library");
 #endif
-    php_info_print_table_row(2, "LZ4 Version", buffer);
     php_info_print_table_end();
 }
 
@@ -78,7 +127,7 @@ zend_module_entry lz4_module_entry = {
 #endif
     "lz4",
     lz4_functions,
-    NULL,
+    PHP_MINIT(lz4),
     NULL,
     NULL,
     NULL,
@@ -99,7 +148,7 @@ static ZEND_FUNCTION(lz4_compress)
     char *output;
     int output_len, data_len, dst_len;
     long level = 0;
-    long maxLevel = (long)LZ4HC_CLEVEL_MAX;
+    long maxLevel = (long)PHP_LZ4_CLEVEL_MAX;
     char *extra = NULL;
 #if ZEND_MODULE_API_NO >= 20141001
     size_t extra_len = -1;
@@ -147,7 +196,7 @@ static ZEND_FUNCTION(lz4_compress)
     } else {
         if (level > maxLevel || level < 0) {
             zend_error(E_WARNING, "lz4_compress: compression level (%ld)"
-                       " must be within 1..%d", level, maxLevel);
+                       " must be within 1..%ld", level, maxLevel);
             efree(output);
             RETURN_FALSE;
         }
