@@ -7,7 +7,7 @@ This extension allows LZ4.
 Documentation for LZ4 can be found at
 [» https://github.com/Cyan4973/lz4](https://github.com/Cyan4973/lz4).
 
-## Build
+## Build from sources
 
     % git clone --recursive --depth=1 https://github.com/kjdev/php-ext-lz4.git
     % cd php-ext-lz4
@@ -16,9 +16,20 @@ Documentation for LZ4 can be found at
     % make
     % make install
 
-> use system library: `./configure --with-lz4-includedir=/usr`
+To use the system library
 
-## Configration
+``` bash
+% ./configure --with-lz4-includedir=/usr
+```
+
+## Distribution binary packages
+
+### Fedora / CentOS / RHEL
+
+RPM packages of this extension are available in [» Remi's RPM repository](https://rpms.remirepo.net/) and are named **php-lz4**.
+
+
+## Configuration
 
 lz4.ini:
 
