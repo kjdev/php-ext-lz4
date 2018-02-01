@@ -24,3 +24,5 @@ run-tests.php
 .phpenv-version
 extras/
 php.sh
+ltmain.sh.backup
+tmp-php.ini
