@@ -2,7 +2,7 @@
 Test lz4_compress() : compress level
 --SKIPIF--
 --FILE--
-<?php 
+<?php
 if (!extension_loaded('lz4')) {
     dl('lz4.' . PHP_SHLIB_SUFFIX);
 }
@@ -35,16 +35,16 @@ check_compress($data, -1);
 *** Data size ***
 3547
 *** Compression Level ***
-1 -- 2715 -- true
-2 -- 2697 -- true
-3 -- 2688 -- true
-4 -- 2687 -- true
-5 -- 2687 -- true
-6 -- 2686 -- true
-7 -- 2686 -- true
-8 -- 2686 -- true
-9 -- 2686 -- true
-10 -- 2686 -- true
+1 -- 2%d -- true
+2 -- 26%d -- true
+3 -- 26%d -- true
+4 -- 26%d -- true
+5 -- 26%d -- true
+6 -- 26%d -- true
+7 -- 26%d -- true
+8 -- 26%d -- true
+9 -- 26%d -- true
+10 -- 26%d -- true
 11 -- 26%d -- true
 12 -- 26%d -- true
 *** Invalid Compression Level ***
