@@ -2,7 +2,7 @@
 Test lz4_compress() function : error conditions
 --SKIPIF--
 <?php
-if (version_compare(PHP_VERSION, '8.0', '>=')) die('skip PHP is too old');
+if (version_compare(PHP_VERSION, '8.0', '<')) die('skip PHP is too new');
 --FILE--
 <?php
 if (!extension_loaded('lz4')) {
@@ -15,13 +15,21 @@ echo "*** Testing lz4_compress() : error conditions ***\n";
 
 // Zero arguments
 echo "\n-- Testing lz4_compress() function with Zero arguments --\n";
-var_dump(lz4_compress());
+try {
+  var_dump(lz4_compress());
+} catch (Error $e) {
+  echo $e, PHP_EOL;
+}
 
 //Test lz4_compress with one more than the expected number of arguments
 echo "\n-- Testing lz4_compress() function with more than expected no. of arguments --\n";
 $data = 'string_val';
 $extra_arg = 10;
-var_dump(lz4_compress($data, 6, false, $extra_arg));
+try {
+  var_dump(lz4_compress($data, 6, false, $extra_arg));
+} catch (Error $e) {
+  echo $e, PHP_EOL;
+}
 
 class Tester {
     function Hello() {
@@ -31,21 +39,27 @@ class Tester {
 
 echo "\n-- Testing with incorrect parameters --\n";
 $testclass = new Tester();
-var_dump(lz4_compress($testclass));
+try {
+  var_dump(lz4_compress($testclass));
+} catch (Error $e) {
+  echo $e, PHP_EOL;
+}
 ?>
 ===Done===
 --EXPECTF--
 *** Testing lz4_compress() : error conditions ***
 
 -- Testing lz4_compress() function with Zero arguments --
-
-Warning: lz4_compress() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
+ArgumentCountError: lz4_compress() expects at least 1 parameter, 0 given in %s:%d
+Stack trace:
+#0 %s(%d): lz4_compress()
+#1 {main}
 
 -- Testing lz4_compress() function with more than expected no. of arguments --
-
-Warning: lz4_compress() expects at most 3 parameters, 4 given in %s on line %d
-bool(false)
+ArgumentCountError: lz4_compress() expects at most 3 parameters, 4 given in %s:%d
+Stack trace:
+#0 %s(%d): lz4_compress(%s)
+#1 {main}
 
 -- Testing with incorrect parameters --
 
