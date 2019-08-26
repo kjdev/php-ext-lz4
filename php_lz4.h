@@ -47,4 +47,10 @@ extern zend_module_entry lz4_module_entry;
 #define LZ4_G(v) (lz4_globals.v)
 #endif
 
+#if ZEND_MODULE_API_NO >= 20190128
+#ifndef TSRMLS_CC
+#define TSRMLS_CC
+#endif
+#endif
+
 #endif  /* PHP_LZ4_H */
