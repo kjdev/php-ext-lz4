@@ -31,7 +31,7 @@ RPM packages of this extension are available in [» Remi's RPM repository](https
 
 ## Configuration
 
-lz4.ini:
+php.ini:
 
     extension=lz4.so
 
