@@ -50,13 +50,13 @@ try {
 *** Testing lz4_compress() : error conditions ***
 
 -- Testing lz4_compress() function with Zero arguments --
-ArgumentCountError: lz4_compress() expects at least 1 parameter, 0 given in %s:%d
+ArgumentCountError: lz4_compress() expects at least 1 argument, 0 given in %s:%d
 Stack trace:
 #0 %s(%d): lz4_compress()
 #1 {main}
 
 -- Testing lz4_compress() function with more than expected no. of arguments --
-ArgumentCountError: lz4_compress() expects at most 3 parameters, 4 given in %s:%d
+ArgumentCountError: lz4_compress() expects at most 3 arguments, 4 given in %s:%d
 Stack trace:
 #0 %s(%d): lz4_compress(%s)
 #1 {main}
