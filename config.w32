@@ -1,8 +1,13 @@
-ARG_ENABLE("lz4", "enable lz4 support", "no");
+ARG_ENABLE("lz4", "enable lz4 support", "yes");
 
 if (PHP_LZ4 != "no") {
-   EXTENSION("lz4", "lz4.c", PHP_LZ4_SHARED, "");
-   ADD_SOURCES(configure_module_dirname + "/lz4/lib", "lz4.c lz4hc.c xxhash.c", "lz4");
-   ADD_FLAG("CFLAGS_LZ4", " /I" + configure_module_dirname + " /I" + configure_module_dirname + "/lz4/lib");
-   PHP_INSTALL_HEADERS("ext/lz4/", "php_lz4.h");
+  if (CHECK_LIB("lz4.lib;liblz4.lib", "lz4", PHP_LZ4) &&
+      CHECK_HEADER_ADD_INCLUDE("lz4.h", "CFLAGS_LZ4", PHP_LZ4)) {
+    EXTENSION("lz4", "lz4.c", PHP_LZ4_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+  } else {
+    EXTENSION("lz4", "lz4.c", PHP_LZ4_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+    ADD_SOURCES("lz4/lib", "lz4.c lz4hc.c xxhash.c", "lz4", "lz4\\lib");
+    ADD_FLAG("CFLAGS_LZ4", " /I" + configure_module_dirname + " /I" + configure_module_dirname + "/lz4/lib");
+  }
+  PHP_INSTALL_HEADERS("ext/lz4/", "php_lz4.h");
 }
