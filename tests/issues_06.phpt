@@ -25,7 +25,7 @@ var_dump($output);
 bool(true)
 === Uncompress ===
 
-Warning: lz4_uncompress : data error in %s on line %d
+Warning: lz4_uncompress : %s error in %s on line %d
 bool(false)
 bool(false)
 ===Done===
