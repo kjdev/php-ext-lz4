@@ -1,15 +1,26 @@
 language: php
 
-php:
-  - 5.6
-  - 7.0
-  - 7.1
-  - 7.2
-  - 7.3
-  - 7.4
-  - nightly
-
 matrix:
+  include:
+    - php: 5.6
+    - php: 7.0
+    - php: 7.1
+    - php: 7.2
+    - php: 7.2
+      env:
+        - REPORT_EXIT_STATUS=1 NO_INTERACTION=1
+        - APCU_TEST=1
+    - php: 7.3
+    - php: 7.3
+      env:
+        - REPORT_EXIT_STATUS=1 NO_INTERACTION=1
+        - APCU_TEST=1
+    - php: 7.4
+    - php: 7.4
+      env:
+        - REPORT_EXIT_STATUS=1 NO_INTERACTION=1
+        - APCU_TEST=1
+    - php: nightly
   fast_finish: true
   allow_failures:
     - php: 'nightly'
@@ -24,6 +35,7 @@ before_script:
   - phpize && ./configure && make
 
 script:
+  - if [ "${APCU_TEST}" ]; then cp $(php-config --extension-dir)/apcu.so modules/; sed -i 's/\$(PHP_TEST_SHARED_EXTENSIONS)/-d extension=apcu \$(PHP_TEST_SHARED_EXTENSIONS)/' Makefile; fi
   - make test | tee test-output.txt && grep 'TEST SUMMARY$' test-output.txt > /dev/null ; test $? '!=' 0
 
 after_failure:
