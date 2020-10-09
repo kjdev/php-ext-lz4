@@ -173,6 +173,112 @@ zend_module_entry lz4_module_entry = {
 ZEND_GET_MODULE(lz4)
 #endif
 
+static int php_lz4_compress(char* in, const int in_len,
+                            char* extra, const int extra_len,
+                            char** out, int* out_len,
+                            const int level)
+{
+    int var_len, var_offset;
+
+    if (extra && extra_len > 0) {
+        var_offset = extra_len;
+    } else {
+        var_offset = sizeof(int);
+    }
+
+    var_len = LZ4_compressBound(in_len) + var_offset;
+
+    *out = (char*)emalloc(var_len);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_compress : memory error");
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    if (extra && extra_len > 0) {
+        memcpy(*out, extra, var_offset);
+    } else {
+        /* Set the data length */
+        memcpy(*out, &in_len, var_offset);
+    }
+
+    if (level == 0) {
+        *out_len = LZ4_compress_default(in,
+                                        (*out) + var_offset,
+                                        in_len,
+                                        var_len - var_offset - 1);
+    } else if (level > 0 && level <= PHP_LZ4_CLEVEL_MAX) {
+        *out_len = LZ4_compress_HC(in,
+                                   (*out) + var_offset,
+                                   in_len,
+                                   var_len - var_offset - 1,
+                                   level);
+    } else {
+        zend_error(E_WARNING,
+                   "lz4_compress: compression level (%d) must be within 1..%d",
+                   level, PHP_LZ4_CLEVEL_MAX);
+        efree(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    if (*out_len <= 0) {
+        zend_error(E_WARNING, "lz4_compress : data error");
+        efree(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    *out_len += var_offset;
+
+    return SUCCESS;
+}
+
+static int php_lz4_uncompress(const char* in, const int in_len,
+                              const int in_max, int in_offset,
+                              char** out, int* out_len)
+{
+    int var_len;
+
+    if (in_max > 0) {
+        var_len = in_max;
+        if (!in_offset) {
+            in_offset = sizeof(int);
+        }
+    } else {
+        /* Get data length */
+        in_offset = sizeof(int);
+        memcpy(&var_len, in, in_offset);
+    }
+
+    if (var_len < 0) {
+        zend_error(E_WARNING, "lz4_uncompress : allocate size error");
+        return FAILURE;
+    }
+
+    *out = (char*)malloc(var_len + 1);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_uncompress : memory error");
+        return FAILURE;
+    }
+
+    *out_len = LZ4_decompress_safe(in + in_offset,
+                                   *out,
+                                   in_len - in_offset,
+                                   var_len);
+    if (*out_len <= 0) {
+        zend_error(E_WARNING, "lz4_uncompress : data error");
+        free(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
 static ZEND_FUNCTION(lz4_compress)
 {
     zval *data;
@@ -200,49 +306,17 @@ static ZEND_FUNCTION(lz4_compress)
         RETURN_FALSE;
     }
 
-    if (extra && extra_len > 0) {
-        offset = extra_len;
-    } else {
-        offset = sizeof(int);
-    }
-
-    data_len = Z_STRLEN_P(data);
-    dst_len = LZ4_compressBound(data_len) + offset;
-
-    output = (char *)emalloc(dst_len);
-    if (!output) {
-        zend_error(E_WARNING, "lz4_compress : memory error");
-        RETURN_FALSE;
-    }
-
-    if (extra && extra_len > 0) {
-        memcpy(output, extra, offset);
-    } else {
-        /* Set the data length */
-        memcpy(output, &data_len, offset);
-    }
-
-    if (level == 0) {
-        output_len = LZ4_compress_default(Z_STRVAL_P(data), output + offset, data_len, dst_len - offset - 1);
-    } else {
-        if (level > maxLevel || level < 0) {
-            zend_error(E_WARNING, "lz4_compress: compression level (%ld)"
-                       " must be within 1..%ld", level, maxLevel);
-            efree(output);
-            RETURN_FALSE;
-        }
-        output_len = LZ4_compress_HC(Z_STRVAL_P(data), output + offset, data_len, dst_len - offset - 1, level);
-    }
-
-    if (output_len <= 0) {
+    if (php_lz4_compress(Z_STRVAL_P(data), Z_STRLEN_P(data),
+                         extra, extra_len,
+                         &output, &output_len,
+                         (int)level) == FAILURE) {
         RETVAL_FALSE;
-    } else {
-#if ZEND_MODULE_API_NO >= 20141001
-        RETVAL_STRINGL(output, output_len + offset);
-#else
-        RETVAL_STRINGL(output, output_len + offset, 1);
-#endif
     }
+#if ZEND_MODULE_API_NO >= 20141001
+    RETVAL_STRINGL(output, output_len);
+#else
+    RETVAL_STRINGL(output, output_len, 1);
+#endif
 
     efree(output);
 }
@@ -269,43 +343,17 @@ static ZEND_FUNCTION(lz4_uncompress)
         RETURN_FALSE;
     }
 
-    if (max_size > 0) {
-        data_size = max_size;
-        if (!offset) {
-            offset = sizeof(int);
-        }
-    } else {
-        /* Get data length */
-        offset = sizeof(int);
-        memcpy(&data_size, Z_STRVAL_P(data), offset);
-    }
-
-    if (data_size < 0) {
-        zend_error(E_WARNING, "lz4_uncompress : allocate size error");
+    if (php_lz4_uncompress(Z_STRVAL_P(data), Z_STRLEN_P(data),
+                           (const int)max_size, (const int)offset,
+                           &output, &output_len) == FAILURE) {
         RETURN_FALSE;
     }
 
-    output = (char *)malloc(data_size + 1);
-    if (!output) {
-        zend_error(E_WARNING, "lz4_uncompress : memory error");
-        RETURN_FALSE;
-    }
-
-    output_len = LZ4_decompress_safe(Z_STRVAL_P(data) + offset,
-                                     output,
-                                     Z_STRLEN_P(data) - offset,
-                                     data_size);
-
-    if (output_len <= 0) {
-        zend_error(E_WARNING, "lz4_uncompress : data error");
-        RETVAL_FALSE;
-    } else {
 #if ZEND_MODULE_API_NO >= 20141001
-        RETVAL_STRINGL(output, output_len);
+    RETVAL_STRINGL(output, output_len);
 #else
-        RETVAL_STRINGL(output, output_len, 1);
+    RETVAL_STRINGL(output, output_len, 1);
 #endif
-    }
 
     free(output);
 }
@@ -332,31 +380,16 @@ static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS)
         return 0;
     }
 
-    data_size = LZ4_compressBound(ZSTR_LEN(var.s) + data_offset);
-    *buf = (char*)emalloc(data_size);
-    if (*buf == NULL) {
-        *buf_len = 0;
-        return 0;
-    }
-
-    memcpy(*buf, &data_size, data_offset);
-
-    out_len = LZ4_compress_default(ZSTR_VAL(var.s),
-                                    (char*)(*buf + data_offset),
-                                    ZSTR_LEN(var.s),
-                                    data_size - data_offset - 1);
-    if (out_len <= 0) {
-        efree(*buf);
-        *buf = NULL;
-        *buf_len = 0;
-        result = 0;
-    } else {
+    if (php_lz4_compress(ZSTR_VAL(var.s), ZSTR_LEN(var.s),
+                         NULL, 0,
+                         (char**)buf, (int*)buf_len,
+                         0) == SUCCESS) {
         result = 1;
+    } else {
+        result = 0;
     }
 
     smart_str_free(&var);
-
-    *buf_len = out_len + data_offset;
 
     return result;
 }
@@ -369,24 +402,9 @@ static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS)
     int var_len, data_size, data_offset = sizeof(int);
     unsigned char* var;
 
-    memcpy(&data_size, buf, data_offset);
-
-    if (data_size < 0) {
-        ZVAL_NULL(value);
-        return 0;
-    }
-    var = (char*)emalloc(data_size + 1);
-    if (var == NULL) {
-        ZVAL_NULL(value);
-        return 0;
-    }
-
-    var_len = LZ4_decompress_safe(buf + data_offset,
-                                  var,
-                                  buf_len - data_offset,
-                                  data_size);
-    if (var_len <= 0) {
-        efree(var);
+    if (php_lz4_uncompress(buf, (const int)buf_len,
+                           0, 0,
+                           (char**)&var, (int*)&var_len) != SUCCESS) {
         ZVAL_NULL(value);
         return 0;
     }
@@ -408,7 +426,7 @@ static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS)
         result = 1;
     }
 
-    efree(var);
+    free(var);
 
     return result;
 }
