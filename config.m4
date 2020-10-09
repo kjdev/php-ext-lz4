@@ -64,6 +64,15 @@ if test "$PHP_LZ4" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/lz4/lib, 1)
     PHP_ADD_INCLUDE([$ext_srcdir/lz4/lib])
   fi
+
+  AC_MSG_CHECKING([for APCu includes])
+  if test -f "$phpincludedir/ext/apcu/apc_serializer.h"; then
+    apc_inc_path="$phpincludedir"
+    AC_MSG_RESULT([APCu in $apc_inc_path])
+    AC_DEFINE(HAVE_APCU_SUPPORT,1,[Whether to enable APCu support])
+  else
+    AC_MSG_RESULT([not found])
+  fi
 fi
 
 dnl coverage
