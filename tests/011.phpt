@@ -35,18 +35,18 @@ check_compress($data, -1);
 *** Data size ***
 3547
 *** Compression Level ***
-1 -- 2%d -- true
-2 -- 26%d -- true
-3 -- 26%d -- true
-4 -- 26%d -- true
-5 -- 26%d -- true
-6 -- 26%d -- true
-7 -- 26%d -- true
-8 -- 26%d -- true
-9 -- 26%d -- true
-10 -- 26%d -- true
-11 -- 26%d -- true
-12 -- 26%d -- true
+1 -- %d -- true
+2 -- 2%d -- true
+3 -- 2%d -- true
+4 -- 2%d -- true
+5 -- 2%d -- true
+6 -- 2%d -- true
+7 -- 2%d -- true
+8 -- 2%d -- true
+9 -- 2%d -- true
+10 -- 2%d -- true
+11 -- 2%d -- true
+12 -- 2%d -- true
 *** Invalid Compression Level ***
 100 -- 0 -- false
 -1 -- 0 -- false
