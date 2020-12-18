@@ -1,7 +1,6 @@
 --TEST--
 Test lz4_compress() function : variation
 --SKIPIF--
-<?php if (PHP_INT_SIZE==4) die("skip 64bits only"); ?>
 --FILE--
 <?php
 if (!extension_loaded('lz4')) {
@@ -14,15 +13,18 @@ echo "*** Testing lz4_compress() : variation ***\n";
 
 echo "\n-- Testing multiple compression --\n";
 $output = lz4_compress($data);
-var_dump(md5($output));
-var_dump(md5(lz4_compress($output)));
-
+$first = md5($output);
+var_dump($first);
+$second = md5(lz4_compress($output));
+var_dump($second);
+var_dump($first === $second);
 ?>
 ===Done===
 --EXPECTF--
 *** Testing lz4_compress() : variation ***
 
 -- Testing multiple compression --
-string(32) "58a645dbce1fcaf21f488b597726efa1"
-string(32) "91336cf7e1da47b49f03cd666d586450"
+string(32) "%s"
+string(32) "%s"
+bool(false)
 ===Done===

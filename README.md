@@ -1,8 +1,5 @@
 # LZ4 Extension for PHP
 
-[![Build Status](https://secure.travis-ci.org/kjdev/php-ext-lz4.png?branch=master)](http://travis-ci.org/kjdev/php-ext-lz4)
-[![Build status](https://ci.appveyor.com/api/projects/status/h9jp12mci7wj2ufg/branch/master?svg=true)](https://ci.appveyor.com/project/kjdev/php-ext-lz4/branch/master)
-
 This extension allows LZ4.
 
 Documentation for LZ4 can be found at

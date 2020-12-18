@@ -1,9 +1,8 @@
 --TEST--
 Test lz4_compress() function : basic functionality
 --SKIPIF--
-<?php if (PHP_INT_SIZE==4) die("skip 64bits only"); ?>
 --FILE--
-<?php 
+<?php
 if (!extension_loaded('lz4')) {
     dl('lz4.' . PHP_SHLIB_SUFFIX);
 }
@@ -22,7 +21,6 @@ $smallstring = "A small string to compress\n";
 // Compressing a big string
 echo "-- Compression --\n";
 $output = lz4_compress($data);
-var_dump(md5($output));
 var_dump(strcmp(lz4_uncompress($output), $data));
 
 // Compressing a smaller string
@@ -35,7 +33,6 @@ var_dump(strcmp(lz4_uncompress($output), $smallstring));
 --EXPECT--
 *** Testing lz4_compress() : basic functionality ***
 -- Compression --
-string(32) "58a645dbce1fcaf21f488b597726efa1"
 int(0)
 -- Compression --
 string(66) "1b000000f00c4120736d616c6c20737472696e6720746f20636f6d70726573730a"
