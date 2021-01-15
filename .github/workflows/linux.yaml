@@ -9,54 +9,53 @@ jobs:
     strategy:
       matrix:
         php:
-          - '8.0'
-          - '7.4'
-          - '7.4-zts'
-          - '7.3'
-          - '7.3-zts'
-          - '7.2'
-          - '7.2-zts'
+          - '8.0-alpine'
+          - '7.4-alpine'
+          - '7.4-zts-alpine'
+          - '7.3-alpine'
+          - '7.3-zts-alpine'
+          - '7.2-alpine'
+          - '7.2-zts-alpine'
         library:
           - ''
-          - 'lz4-dev'
+          - 'system'
         apcu:
           - ''
           - 'apcu'
         image: [php]
         include:
-          - php: '8.0-zts'
+          - php: '8.0-zts-alpine'
             image: ghcr.io/kjdev/php
-          - php: '8.0-zts'
+          - php: '8.0-zts-alpine'
             image: ghcr.io/kjdev/php
-            library: 'lib4-dev'
-          - php: '7.1'
+            library: 'system'
+          - php: '7.1-alpine'
             image: ghcr.io/kjdev/php
-          - php: '7.0'
+          - php: '7.0-alpine'
             image: ghcr.io/kjdev/php
-          - php: '5.6'
+          - php: '5.6-alpine'
             image: ghcr.io/kjdev/php
 
     container:
-      image: ${{ matrix.image }}:${{ matrix.php }}-alpine3.12
+      image: ${{ matrix.image }}:${{ matrix.php }}
 
     steps:
       - name: Prepare required command
         run: |
           apk upgrade --no-cache
-          apk add --no-cache git
+          apk add --no-cache autoconf gcc git libtool make musl-dev
 
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Checkout submodules
-        run: git submodule update --init --recursive
-        if: ${{ matrix.library == '' }}
+        run: |
+          git submodule update --init --recursive
+        if: ${{ ! matrix.library }}
       - name: Install dependency library
-        run: apk add --no-cache lz4-dev
+        run: |
+          apk add --no-cache lz4-dev
         if: ${{ matrix.library }}
-
-      - name: Install build command
-        run: apk add --no-cache autoconf gcc libtool make musl-dev
 
       - name: Install PHP APCu extension
         run: |
@@ -69,7 +68,7 @@ jobs:
           phpize
           ./configure
           make
-        if: ${{ matrix.library == '' }}
+        if: ${{ ! matrix.library }}
       - name: Build with library
         run: |
           phpize
@@ -83,7 +82,9 @@ jobs:
           sed -i 's/\$(PHP_TEST_SHARED_EXTENSIONS)/-d extension=apcu \$(PHP_TEST_SHARED_EXTENSIONS)/' Makefile
         if: ${{ matrix.apcu }}
       - name: Test
-        run: make test
+        run: |
+          make test TESTS="--show-diff" | tee test-output.txt
+          grep 'TEST SUMMARY$' test-output.txt > /dev/null && exit 1 || exit 0
         env:
           REPORT_EXIT_STATUS: 1
           NO_INTERACTION: 1
