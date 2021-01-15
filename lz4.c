@@ -366,16 +366,9 @@ static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS)
     int out_len, data_size, data_offset = sizeof(int);
     smart_str var = {0};
 
-    BG(serialize_lock)++;
     PHP_VAR_SERIALIZE_INIT(var_hash);
     php_var_serialize(&var, (zval*) value, &var_hash);
     PHP_VAR_SERIALIZE_DESTROY(var_hash);
-    BG(serialize_lock)--;
-
-    if (EG(exception)) {
-        smart_str_free(&var);
-        var.s = NULL;
-    }
     if (var.s == NULL) {
         return 0;
     }
@@ -409,12 +402,10 @@ static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS)
         return 0;
     }
 
-    BG(serialize_lock)++;
     PHP_VAR_UNSERIALIZE_INIT(var_hash);
     tmp = var;
     result = php_var_unserialize(value, &tmp, var + var_len, &var_hash);
     PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-    BG(serialize_lock)--;
 
     if (!result) {
         php_error_docref(NULL, E_NOTICE,
