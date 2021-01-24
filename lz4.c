@@ -283,16 +283,14 @@ static ZEND_FUNCTION(lz4_compress)
 {
     zval *data;
     char *output;
-    int output_len, data_len, dst_len;
+    int output_len;
     long level = 0;
-    long maxLevel = (long)PHP_LZ4_CLEVEL_MAX;
     char *extra = NULL;
 #if ZEND_MODULE_API_NO >= 20141001
     size_t extra_len = -1;
 #else
     int extra_len = -1;
 #endif
-    int offset = 0;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
                               "z|ls", &data, &level,
@@ -324,7 +322,7 @@ static ZEND_FUNCTION(lz4_compress)
 static ZEND_FUNCTION(lz4_uncompress)
 {
     zval *data;
-    int output_len, data_size;
+    int output_len;
     char *output;
 #if ZEND_MODULE_API_NO >= 20141001
     zend_long max_size = -1, offset = 0;
