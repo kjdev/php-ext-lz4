@@ -29,6 +29,10 @@ To use the system library
 
 RPM packages of this extension are available in [» Remi's RPM repository](https://rpms.remirepo.net/) and are named **php-lz4**.
 
+### Debian
+
+DEB packages of this extension are available in [» Ondřej Surý's DEB repository](https://deb.sury.org/) and are named **php-lz4**.
+
 
 ## Configuration
 
