@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         php:
+          - '8.1-alpine'
           - '8.0-alpine'
           - '7.4-alpine'
           - '7.4-zts-alpine'
@@ -24,6 +25,11 @@ jobs:
           - 'apcu'
         image: [php]
         include:
+          - php: '8.1-zts-alpine'
+            image: ghcr.io/kjdev/php
+          - php: '8.1-zts-alpine'
+            image: ghcr.io/kjdev/php
+            library: 'system'
           - php: '8.0-zts-alpine'
             image: ghcr.io/kjdev/php
           - php: '8.0-zts-alpine'
