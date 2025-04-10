@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.10.13" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+ <name>lz4</name>
+ <channel>pecl.php.net</channel>
+ <summary>LZ4 extension</summary>
+ <description>A compression/decompression with LZ4</description>
+ <lead>
+  <name>Tatsuya KAMIJO</name>
+  <user>kjdev</user>
+  <email>kjdev@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>${DATE}</date>
+ <version>
+  <release>${VERSION}</release>
+  <api>${VERSION}</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license>MIT</license>
+ <notes>
+${NOTES}
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="README.md" role="doc" />
+   <file name="lz4.c" role="src" />
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="php_lz4.h" role="src" />
+   <file name="php_verdep.h" role="src" />
+   <file name="lz4/LICENSE" role="doc" />
+   <file name="lz4/lib/lz4.c" role="src" />
+   <file name="lz4/lib/lz4.h" role="src" />
+   <file name="lz4/lib/lz4hc.c" role="src" />
+   <file name="lz4/lib/lz4hc.h" role="src" />
+   <file name="lz4/lib/xxhash.c" role="src" />
+   <file name="lz4/lib/xxhash.h" role="src" />
+   <file name="tests/001.phpt" role="test" />
+   <file name="tests/002.phpt" role="test" />
+   <file name="tests/002_b.phpt" role="test" />
+   <file name="tests/003.phpt" role="test" />
+   <file name="tests/004.phpt" role="test" />
+   <file name="tests/005.phpt" role="test" />
+   <file name="tests/005_b.phpt" role="test" />
+   <file name="tests/006.phpt" role="test" />
+   <file name="tests/007.phpt" role="test" />
+   <file name="tests/008.phpt" role="test" />
+   <file name="tests/009.phpt" role="test" />
+   <file name="tests/010.phpt" role="test" />
+   <file name="tests/011.phpt" role="test" />
+   <file name="tests/apcu_serializer.phpt" role="test" />
+   <file name="tests/data.inc" role="test" />
+   <file name="tests/data32.txt" role="test" />
+   <file name="tests/data64.txt" role="test" />
+   <file name="tests/issues_06.phpt" role="test" />
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.6</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>lz4</providesextension>
+ <extsrcrelease />
+</package>
