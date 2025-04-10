@@ -1,0 +1,14 @@
+{
+  "name": "kjdev/lz4",
+  "type": "php-ext",
+  "license": "MIT",
+  "description": "A compression/decompression with LZ4",
+  "require": {
+    "php": ">= 5.6.0"
+  },
+  "php-ext": {
+    "extension-name": "lz4",
+    "download-url-method": "pre-packaged-source",
+    "configure-options": []
+  }
+}
