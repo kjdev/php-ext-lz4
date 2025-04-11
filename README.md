@@ -1,7 +1,7 @@
 # LZ4 Extension for PHP
 
-[![Linux](https://github.com/kjdev/php-ext-lz4/workflows/Linux/badge.svg?branch=master)](https://github.com/kjdev/php-ext-lz4/actions?query=workflow%3ALinux+branch%3Amaster)
-[![Windows](https://github.com/kjdev/php-ext-lz4/workflows/Windows/badge.svg?branch=master)](https://github.com/kjdev/php-ext-lz4/actions?query=workflow%3AWindows+branch%3Amaster)
+[![Linux](https://github.com/kjdev/php-ext-lz4/actions/workflows/linux.yaml/badge.svg?branch=master)](https://github.com/kjdev/php-ext-lz4/actions/workflows/linux.yaml)
+[![Windows](https://github.com/kjdev/php-ext-lz4/actions/workflows/windows.yaml/badge.svg?branch=master)](https://github.com/kjdev/php-ext-lz4/actions/workflows/windows.yaml)
 
 This extension allows LZ4.
 
