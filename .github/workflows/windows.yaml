@@ -90,8 +90,8 @@ jobs:
       - if: ${{ github.event_name == 'release' }}
         name: Archive DLL
         run: |-
-          Copy-Item .\php_${{ env.PHP_EXT }}.dll .\${EXT_NAME}.dll
-          Compress-Archive -Path .\${EXT_NAME}.dll -Destination .\${EXT_NAME}.zip
+          Copy-Item .\php_${{ env.PHP_EXT }}.dll .\$env:EXT_NAME.dll
+          Compress-Archive -Path .\$env:EXT_NAME.dll -Destination .\$env:EXT_NAME.zip
         shell: pwsh
         env:
           EXT_NAME: php_${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch }}
@@ -99,11 +99,9 @@ jobs:
       - if: ${{ github.event_name == 'release' }}
         name: Store archive DLL
         uses: actions/upload-artifact@v4
-        env:
-          EXT_NAME: php_${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch }}
         with:
-          name: ${EXT_NAME}
-          path: .\${EXT_NAME}.zip
+          name: php_${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch }}
+          path: .\php_${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch }}.zip
           overwrite: true
 
   release:
