@@ -42,7 +42,7 @@ jobs:
           # arch: ${{ matrix.arch }}
           arch: x64
           # ts: ${{ matrix.ts }}
-          ts: ntx
+          ts: nts
       #     extension-url: https://github.com/xdebug/xdebug
       #     extension-ref: '3.3.2'
 
