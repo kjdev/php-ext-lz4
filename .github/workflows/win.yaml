@@ -34,6 +34,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Checkout submodule
+        run: .\.github\workflows\submodule.ps1
+        shell: pwsh
+
       - name: Build the extension
         uses: php/php-windows-builder/extension@v1
         with:
