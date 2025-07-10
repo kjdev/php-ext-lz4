@@ -1,7 +1,7 @@
 #ifndef PHP_VERDEP_H
 #define PHP_VERDEP_H
 
-#ifndef ZED_FE_END
+#ifndef ZEND_FE_END
 #define ZEND_FE_END { NULL, NULL, NULL, 0, 0 }
 #endif
 
