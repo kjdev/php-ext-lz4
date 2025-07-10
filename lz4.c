@@ -115,27 +115,7 @@ ZEND_MINFO_FUNCTION(lz4)
     php_info_print_table_start();
     php_info_print_table_row(2, "LZ4 support", "enabled");
     php_info_print_table_row(2, "Extension Version", LZ4_EXT_VERSION);
-#if !defined(HAVE_LIBLZ4)
-    /* Bundled library */
-    php_info_print_table_row(2, "LZ4 Version", LZ4_versionString());
-#elif defined(LZ4_VERSION_MAJOR)
-    /* Recent system library */
-    {
-    char buffer[128];
-
-    snprintf(buffer, sizeof(buffer), "%d.%d.%d",
-             LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE);
-    php_info_print_table_row(2, "LZ4 headers Version", buffer);
-
-    /* LZ4_versionString is not usable, see https://github.com/lz4/lz4/issues/301 */
-    snprintf(buffer, sizeof(buffer), "%d.%d.%d",
-             LZ4_versionNumber()/10000, (LZ4_versionNumber()/100)%100, LZ4_versionNumber()%100);
-    php_info_print_table_row(2, "LZ4 library Version", buffer);
-    }
-#else
-    /* Old system library */
-    php_info_print_table_row(2, "LZ4 Version", "system library");
-#endif
+    php_info_print_table_row(2, "LZ4 Version", (char *)LZ4_versionString());
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
     php_info_print_table_row(2, "LZ4 APCu serializer ABI", APC_SERIALIZER_ABI);
 #endif
