@@ -1,0 +1,12 @@
+{
+  "require": {
+    "libcurl": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-scoutapm"
+      }
+    ]
+  }
+}

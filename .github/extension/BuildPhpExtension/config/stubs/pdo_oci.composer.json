@@ -1,0 +1,12 @@
+{
+  "require": {
+    "instantclient": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "with-pdo-oci=../deps,shared"
+      }
+    ]
+  }
+}

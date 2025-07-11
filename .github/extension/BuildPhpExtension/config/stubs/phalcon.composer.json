@@ -1,0 +1,12 @@
+{
+  "require": {
+    "ext-psr": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-phalcon"
+      }
+    ]
+  }
+}

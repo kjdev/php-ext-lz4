@@ -1,0 +1,12 @@
+{
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-parle=shared"
+      },
+      {
+        "name": "disable-parle-utf32"
+      }
+    ]
+  }
+}

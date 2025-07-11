@@ -1,0 +1,15 @@
+{
+  "require": {
+    "zlib": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "with-xdebug"
+      },
+      {
+        "name": "with-xdebug-compression"
+      }
+    ]
+  }
+}

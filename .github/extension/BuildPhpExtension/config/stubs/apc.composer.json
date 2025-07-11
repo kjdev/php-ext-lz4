@@ -1,0 +1,12 @@
+{
+  "require": {
+    "ext-apcu": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-apc"
+      }
+    ]
+  }
+}

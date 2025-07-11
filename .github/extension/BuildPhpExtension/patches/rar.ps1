@@ -1,0 +1,1 @@
+Invoke-Webrequest -Uri https://raw.githubusercontent.com/cataphract/php-rar/253682388809e1371ff8e3180e673fc4f1c69e99/config.w32 -OutFile config.w32

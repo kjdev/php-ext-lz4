@@ -39,7 +39,8 @@ jobs:
         shell: pwsh
 
       - name: Build the extension
-        uses: php/php-windows-builder/extension@v1
+        # uses: php/php-windows-builder/extension@v1
+        uses: ./.github/extension
         with:
           # php-version: ${{ matrix.php-version }}
           php-version: '8.1'
@@ -47,7 +48,7 @@ jobs:
           arch: x64
           # ts: ${{ matrix.ts }}
           ts: nts
-          build-directory: ${{ github.workspace }}
+          # build-directory: ${{ github.workspace }}
       #     extension-url: https://github.com/xdebug/xdebug
       #     extension-ref: '3.3.2'
 

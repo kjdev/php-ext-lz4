@@ -1,0 +1,88 @@
+name: build-php-extension
+description: Build PHP Extension
+author: php
+
+branding:
+  icon: package
+  color: purple
+
+inputs:
+  extension-url:
+    description: URL to the extension source code
+    required: false
+  extension-ref:
+    description: Git reference in the extension repo
+    required: false
+  auth-token:
+    description: Auth token to fetch the extension source code
+    required: false
+  php-version:
+    description: PHP version to build
+    required: true
+  arch:
+    description: Architecture to build
+    required: true
+  ts:
+    description: Thread safety to build
+    required: true
+  args:
+    description: Additional arguments to pass to the build script
+    required: false
+  libs:
+    description: Libraries required to build the extension
+    required: false
+  run-tests:
+    description: Run tests after building the extension
+    required: false
+    default: 'true'
+  test-runner:
+    description: Test runner to use
+    required: false
+    default: 'run-tests.php'
+  test-opcache-mode:
+    description: Test opcache mode
+    required: false
+    default: 'off'
+  test-workers:
+    description: Test workers
+    required: false
+    default: '8'
+  build-directory:
+    description: Directory to build the extension in
+    required: false
+    default: 'build'
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Build PHP Extension
+      id: build
+      shell: pwsh
+      env:
+        CONFIGURE_ARGS: ${{inputs.args}}
+        LIBRARIES: ${{inputs.libs}}
+        ARTIFACT_NAMING_SCHEME: ${{env.artifact-naming-scheme}}
+        RUN_TESTS: ${{inputs.run-tests}}
+        TEST_RUNNER: ${{inputs.test-runner}}
+        TEST_OPCACHE_MODE: ${{inputs.test-opcache-mode}}
+        TEST_WORKERS: ${{inputs.test-workers}}
+        BUILD_DIRECTORY: ${{inputs.build-directory}}
+        AUTH_TOKEN: ${{inputs.auth-token}}
+        AUTO_DETECT_ARGS: ${{env.auto-detect-args}}
+        AUTO_DETECT_LIBS: ${{env.auto-detect-libs}}
+      run: |
+        Import-Module ${{ github.action_path }}\BuildPhpExtension -Force
+        Invoke-PhpBuildExtension -ExtensionUrl "${{inputs.extension-url}}" `
+                                 -ExtensionRef "${{inputs.extension-ref}}" `
+                                 -PhpVersion ${{inputs.php-version}} `
+                                 -Arch ${{inputs.arch}} `
+                                 -Ts ${{inputs.ts}}
+
+    - name: Upload the build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.build.outputs.artifact }}
+        path: artifacts/*

@@ -1,0 +1,18 @@
+{
+  "require": {
+    "openssl": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-mongodb"
+      },
+      {
+        "name": "with-mongodb-sasl=yes"
+      },
+      {
+        "name": "with-mongodb-client-side-encryption=yes"
+      }
+    ]
+  }
+}

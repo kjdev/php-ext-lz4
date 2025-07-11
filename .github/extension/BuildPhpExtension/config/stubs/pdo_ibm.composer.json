@@ -1,0 +1,12 @@
+{
+  "require": {
+    "odbc_cli": "*"
+  },
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "with-pdo-ibm=../deps"
+      }
+    ]
+  }
+}

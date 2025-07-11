@@ -1,0 +1,61 @@
+{
+  "php": {
+    "7.1": "vc14",
+    "7.2": "vc15",
+    "7.3": "vc15",
+    "7.4": "vc15",
+    "8.0": "vs16",
+    "8.1": "vs16",
+    "8.2": "vs16",
+    "8.3": "vs16",
+    "8.4": "vs17",
+    "8.5": "vs17",
+    "master": "vs17"
+  },
+  "vs" : {
+    "vc14": {
+      "major": 14,
+      "minorMin": 0,
+      "minorMax": 9,
+      "components": [
+        "Microsoft.VisualStudio.Component.CoreBuildTools",
+        "Microsoft.VisualStudio.Component.VC.140",
+        "Microsoft.VisualStudio.Component.VC.ATL",
+        "Microsoft.VisualStudio.Component.Windows10SDK.19041"
+      ]
+    },
+    "vc15": {
+      "major": 14,
+      "minorMin": 10,
+      "minorMax": 19,
+      "components": [
+        "Microsoft.VisualStudio.Component.CoreBuildTools",
+        "Microsoft.VisualStudio.Component.VC.v141.x86.x64",
+        "Microsoft.VisualStudio.Component.VC.ATL",
+        "Microsoft.VisualStudio.Component.Windows10SDK.19041"
+      ]
+    },
+    "vs16": {
+      "major": 14,
+      "minorMin": 20,
+      "minorMax": 29,
+      "components": [
+        "Microsoft.VisualStudio.Component.CoreBuildTools",
+        "Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64",
+        "Microsoft.VisualStudio.Component.VC.ATL",
+        "Microsoft.VisualStudio.Component.Windows10SDK.19041"
+      ]
+    },
+    "vs17": {
+      "major": 14,
+      "minorMin": 30,
+      "minorMax": null,
+      "components": [
+        "Microsoft.VisualStudio.Component.CoreBuildTools",
+        "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+        "Microsoft.VisualStudio.Component.VC.ATL",
+        "Microsoft.VisualStudio.Component.Windows10SDK.19041"
+      ]
+    }
+  }
+}

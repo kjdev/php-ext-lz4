@@ -1,0 +1,9 @@
+{
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-var_representation=shared"
+      }
+    ]
+  }
+}

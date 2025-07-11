@@ -1,0 +1,1 @@
+(Get-Content php_xxtea.c) | ForEach-Object { $_ -replace 'win32/php_stdint.h', 'stdint.h' } | Set-Content php_xxtea.c

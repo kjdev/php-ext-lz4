@@ -1,0 +1,15 @@
+{
+  "php-ext": {
+    "configure-options": [
+      {
+        "name": "enable-redis"
+      },
+      {
+        "name": "enable-redis-session"
+      },
+      {
+        "name": "disable-redis-igbinary"
+      }
+    ]
+  }
+}
