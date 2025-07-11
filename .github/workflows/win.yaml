@@ -42,11 +42,12 @@ jobs:
         uses: php/php-windows-builder/extension@v1
         with:
           # php-version: ${{ matrix.php-version }}
-          php-version: '8.4'
+          php-version: '8.1'
           # arch: ${{ matrix.arch }}
           arch: x64
           # ts: ${{ matrix.ts }}
           ts: nts
+          build-directory: ${{ github.workspace }}
       #     extension-url: https://github.com/xdebug/xdebug
       #     extension-ref: '3.3.2'
 
