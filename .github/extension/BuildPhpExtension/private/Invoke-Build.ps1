@@ -38,7 +38,10 @@ Function Invoke-Build {
                 $Config.vs_version,
                 $Config.arch
             ) -join "-")
-            & $builder -c $Config.vs_version -a $Config.Arch -s $Config.vs_toolset -t $task | Tee-Object -FilePath "build-$suffix.txt"
+            # & $builder -c $Config.vs_version -a $Config.Arch -s $Config.vs_toolset -t $task | Tee-Object -FilePath "build-$suffix.txt"
+            echo "$builder -c $Config.vs_version -a $Config.Arch -s $Config.vs_toolset -t $task"
+            echo "build-$suffix.txt"
+            $builder -c $Config.vs_version -a $Config.Arch -s $Config.vs_toolset -t $task
             Set-GAGroup end
             if(-not(Test-Path "$((Get-Location).Path)\$($Config.build_directory)\php_$($Config.name).dll")) {
                 throw "Failed to build the extension"
