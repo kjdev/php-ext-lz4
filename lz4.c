@@ -289,15 +289,6 @@ static int php_lz4_compress_frame(char* in, const int in_len,
     int var_len;
     LZ4F_preferences_t preferences = LZ4F_INIT_PREFERENCES;
 
-    var_len = LZ4F_compressFrameBound(in_len, &preferences);
-
-    *out = (char*)emalloc(var_len);
-    if (!*out) {
-        zend_error(E_WARNING, "lz4_compress_frame : memory error");
-        *out_len = 0;
-        return FAILURE;
-    }
-
     if (max_block_size < 4 || max_block_size > 7) {
         max_block_size = 0;
     }
@@ -307,10 +298,20 @@ static int php_lz4_compress_frame(char* in, const int in_len,
     preferences.frameInfo.blockChecksumFlag = (checksums & 0x02) >> 1;
     preferences.compressionLevel = level;
 
-    *out_len = LZ4F_compressFrame(*out, var_len, in, in_len, &preferences);
+    var_len = LZ4F_compressFrameBound(in_len, &preferences);
 
-    if (*out_len <= 0) {
-        zend_error(E_WARNING, "lz4_compress_frame : data error");
+    *out = (char*)emalloc(var_len);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_compress_frame : memory error");
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    *out_len = LZ4F_compressFrame(*out, var_len, in, in_len, &preferences);
+    if (LZ4F_isError(*out_len)) {
+        zend_error(E_WARNING, 
+                   "lz4_compress_frame : data error (%s)",
+                   LZ4F_getErrorName(*out_len));
         efree(*out);
         *out = NULL;
         *out_len = 0;
@@ -351,7 +352,7 @@ static int php_lz4_uncompress_frame(const char* in, const int in_len,
     size_next = LZ4F_getFrameInfo(dctx, &frame_info, in, &in_size_consumed);
     if (LZ4F_isError(size_next)) {
         zend_error(E_WARNING, 
-                   "lz4_uncompress_frame : create decompression context (%s)",
+                   "lz4_uncompress_frame : get frame info (%s)",
                    LZ4F_getErrorName(size_next));
         LZ4F_freeDecompressionContext(dctx);
         return FAILURE;
@@ -375,7 +376,7 @@ static int php_lz4_uncompress_frame(const char* in, const int in_len,
         if (frame_info.contentSize == 0 && *out_len - out_offset < block_size) {
             *out_len += block_size * 3;
             char *tmp = (char*)realloc(*out, *out_len);
-            if (!*tmp) {
+            if (!tmp) {
                 zend_error(E_WARNING, "lz4_uncompress_frame : memory error");
                 LZ4F_freeDecompressionContext(dctx);
                 free(*out);
@@ -526,7 +527,7 @@ static ZEND_FUNCTION(lz4_compress_frame)
 
     if (Z_TYPE_P(data) != IS_STRING) {
         zend_error(E_WARNING,
-                   "lz4_compress : expects parameter to be string.");
+                   "lz4_compress_frame : expects parameter to be string.");
         RETURN_FALSE;
     }
 
@@ -559,7 +560,7 @@ static ZEND_FUNCTION(lz4_uncompress_frame)
 
     if (Z_TYPE_P(data) != IS_STRING) {
         zend_error(E_WARNING,
-                   "lz4_uncompress : expects parameter to be string.");
+                   "lz4_uncompress_frame : expects parameter to be string.");
         RETURN_FALSE;
     }
 
