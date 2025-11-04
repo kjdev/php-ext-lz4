@@ -39,6 +39,7 @@
 /* lz4 */
 #include "lz4.h"
 #include "lz4hc.h"
+#include "lz4frame.h"
 
 #if defined(LZ4HC_CLEVEL_MAX)
 /* version >= 1.7.5 */
@@ -68,6 +69,8 @@
 
 static ZEND_FUNCTION(lz4_compress);
 static ZEND_FUNCTION(lz4_uncompress);
+static ZEND_FUNCTION(lz4_compress_frame);
+static ZEND_FUNCTION(lz4_uncompress_frame);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
     ZEND_ARG_INFO(0, data)
@@ -81,6 +84,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress, 0, 0, 1)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress_frame, 0, 0, 1)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_INFO(0, level)
+    ZEND_ARG_INFO(0, max_block_size)
+    ZEND_ARG_INFO(0, checksums)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_frame, 0, 0, 1)
+    ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
 static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS);
 static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS);
@@ -89,6 +103,8 @@ static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS);
 static zend_function_entry lz4_functions[] = {
     ZEND_FE(lz4_compress, arginfo_lz4_compress)
     ZEND_FE(lz4_uncompress, arginfo_lz4_uncompress)
+    ZEND_FE(lz4_compress_frame, arginfo_lz4_compress_frame)
+    ZEND_FE(lz4_uncompress_frame, arginfo_lz4_uncompress_frame)
     ZEND_FE_END
 };
 
@@ -260,6 +276,158 @@ static int php_lz4_uncompress(const char* in, const int in_len,
     return SUCCESS;
 }
 
+/**
+ * @param max_block_size 4: 64KB, 5: 256KB, 6: 1MB, 7: 4MB, all other values: 64KB
+ * @param checksums 0: none, 1: frame content, 2: each block, 3: frame content + each block
+ */
+static int php_lz4_compress_frame(char* in, const int in_len,
+                                  char** out, int* out_len,
+                                  const int level,
+                                  int max_block_size,
+                                  const int checksums)
+{
+    int var_len;
+    LZ4F_preferences_t preferences = LZ4F_INIT_PREFERENCES;
+
+    var_len = LZ4F_compressFrameBound(in_len, &preferences);
+
+    *out = (char*)emalloc(var_len);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_compress_frame : memory error");
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    if (max_block_size < 4 || max_block_size > 7) {
+        max_block_size = 0;
+    }
+    preferences.frameInfo.blockSizeID = max_block_size;
+    preferences.frameInfo.contentSize = in_len;
+    preferences.frameInfo.contentChecksumFlag = checksums & 0x01;
+    preferences.frameInfo.blockChecksumFlag = (checksums & 0x02) >> 1;
+    preferences.compressionLevel = level;
+
+    *out_len = LZ4F_compressFrame(*out, var_len, in, in_len, &preferences);
+
+    if (*out_len <= 0) {
+        zend_error(E_WARNING, "lz4_compress_frame : data error");
+        efree(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+static size_t get_block_size(const LZ4F_frameInfo_t *frame_info)
+{
+    switch (frame_info->blockSizeID) {
+        case LZ4F_max256KB: return 1 << 18;
+        case LZ4F_max1MB: return 1 << 20;
+        case LZ4F_max4MB: return 1 << 22;
+        default: return 1 << 16;        // 64kibi
+    }
+}
+
+static int php_lz4_uncompress_frame(const char* in, const int in_len,
+                                    char** out, unsigned long int* out_len)
+{
+    LZ4F_dctx* dctx;
+    LZ4F_errorCode_t err;
+    size_t size_next, in_offset, out_offset, in_size_consumed, out_size_decompressed, block_size;
+    LZ4F_frameInfo_t frame_info;
+    LZ4F_decompressOptions_t decomp_options = { 0u, 0u, 0u, 0u };
+
+    err = LZ4F_createDecompressionContext(&dctx, LZ4F_VERSION);
+    if (LZ4F_isError(err)) {
+        zend_error(E_WARNING, 
+                   "lz4_uncompress_frame : create decompression context (%s)",
+                   LZ4F_getErrorName(err));
+        return FAILURE;
+    }
+
+    in_size_consumed = LZ4F_HEADER_SIZE_MAX;
+    size_next = LZ4F_getFrameInfo(dctx, &frame_info, in, &in_size_consumed);
+    if (LZ4F_isError(size_next)) {
+        zend_error(E_WARNING, 
+                   "lz4_uncompress_frame : create decompression context (%s)",
+                   LZ4F_getErrorName(size_next));
+        LZ4F_freeDecompressionContext(dctx);
+        return FAILURE;
+    }
+
+    block_size = get_block_size(&frame_info);
+    *out_len = block_size;
+    if (frame_info.contentSize > 0) {
+        *out_len = frame_info.contentSize;
+    }
+    *out = (char*)malloc(*out_len);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_uncompress_frame : memory error");
+        LZ4F_freeDecompressionContext(dctx);
+        return FAILURE;
+    }
+
+    in_offset = in_size_consumed;
+    out_offset = 0;
+    while (size_next > 0) {
+        if (frame_info.contentSize == 0 && *out_len - out_offset < block_size) {
+            *out_len += block_size * 3;
+            *out = (char*)realloc(*out, *out_len);
+            if (!*out) {
+                zend_error(E_WARNING, "lz4_uncompress_frame : memory error");
+                LZ4F_freeDecompressionContext(dctx);
+                return FAILURE;
+            }
+        }
+
+        in_size_consumed = size_next;
+        out_size_decompressed = *out_len - out_offset;
+
+        size_next = LZ4F_decompress(dctx,
+                                (*out) + out_offset,
+                                &out_size_decompressed,
+                                in + in_offset,
+                                &in_size_consumed,
+                                &decomp_options);
+        if (LZ4F_isError(size_next)) {
+            zend_error(E_WARNING, 
+                       "lz4_uncompress_frame : data error (%s)",
+                       LZ4F_getErrorName(size_next));
+            LZ4F_freeDecompressionContext(dctx);
+            free(*out);
+            *out = NULL;
+            *out_len = 0;
+            return FAILURE;
+        }
+        
+        in_offset += in_size_consumed;
+        out_offset += out_size_decompressed;
+
+        if (in_size_consumed == 0) {
+            zend_error(E_WARNING, 
+                       "lz4_uncompress_frame : data error (unexpected uncompressed data size)");
+            LZ4F_freeDecompressionContext(dctx);
+            free(*out);
+            *out = NULL;
+            *out_len = 0;
+            return FAILURE;
+        }
+    }
+    *out_len = out_offset;
+
+    err = LZ4F_freeDecompressionContext(dctx);
+    if (LZ4F_isError(err)) {
+        zend_error(E_WARNING, 
+                   "lz4_uncompress_frame : free decompression context (%s)",
+                   LZ4F_getErrorName(err));
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
 static ZEND_FUNCTION(lz4_compress)
 {
     zval *data;
@@ -324,6 +492,74 @@ static ZEND_FUNCTION(lz4_uncompress)
 
     if (php_lz4_uncompress(Z_STRVAL_P(data), Z_STRLEN_P(data),
                            (const int)max_size, (const int)offset,
+                           &output, &output_len) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+#if ZEND_MODULE_API_NO >= 20141001
+    RETVAL_STRINGL(output, output_len);
+#else
+    RETVAL_STRINGL(output, output_len, 1);
+#endif
+
+    free(output);
+}
+
+static ZEND_FUNCTION(lz4_compress_frame)
+{
+    zval *data;
+    char *output;
+    int output_len;
+    long level = 0;
+    long max_block_size = 0;
+    long checksums = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+                              "z|lll", &data, &level,
+                              &max_block_size, &checksums) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    if (Z_TYPE_P(data) != IS_STRING) {
+        zend_error(E_WARNING,
+                   "lz4_compress : expects parameter to be string.");
+        RETURN_FALSE;
+    }
+
+    if (php_lz4_compress_frame(Z_STRVAL_P(data), Z_STRLEN_P(data),
+                               &output, &output_len,
+                               (int)level,
+                               (int)max_block_size,
+                               (int)checksums) == FAILURE) {
+        RETVAL_FALSE;
+    }
+#if ZEND_MODULE_API_NO >= 20141001
+    RETVAL_STRINGL(output, output_len);
+#else
+    RETVAL_STRINGL(output, output_len, 1);
+#endif
+
+    efree(output);
+}
+
+static ZEND_FUNCTION(lz4_uncompress_frame)
+{
+    zval *data;
+    unsigned long int output_len;
+    char *output;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+                              "z", &data) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    if (Z_TYPE_P(data) != IS_STRING) {
+        zend_error(E_WARNING,
+                   "lz4_uncompress : expects parameter to be string.");
+        RETURN_FALSE;
+    }
+
+    if (php_lz4_uncompress_frame(Z_STRVAL_P(data), Z_STRLEN_P(data),
                            &output, &output_len) == FAILURE) {
         RETURN_FALSE;
     }

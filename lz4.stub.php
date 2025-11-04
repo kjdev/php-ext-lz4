@@ -32,4 +32,9 @@ namespace {
 
   function lz4_uncompress(string $data, int $maxsize = -1, int $offset = -1): string|false {}
 
+  function lz4_compress_frame(string $data, int $level = 0, int $max_block_size = 0, int $checksums = 0): string|false {}
+
+
+  function lz4_uncompress_frame(string $data): string|false {}
+
 }
