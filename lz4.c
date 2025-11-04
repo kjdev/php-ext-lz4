@@ -374,12 +374,16 @@ static int php_lz4_uncompress_frame(const char* in, const int in_len,
     while (size_next > 0) {
         if (frame_info.contentSize == 0 && *out_len - out_offset < block_size) {
             *out_len += block_size * 3;
-            *out = (char*)realloc(*out, *out_len);
-            if (!*out) {
+            char *tmp = (char*)realloc(*out, *out_len);
+            if (!*tmp) {
                 zend_error(E_WARNING, "lz4_uncompress_frame : memory error");
                 LZ4F_freeDecompressionContext(dctx);
+                free(*out);
+                *out = NULL;
+                *out_len = 0;
                 return FAILURE;
             }
+            *out = tmp;
         }
 
         in_size_consumed = size_next;
@@ -531,7 +535,7 @@ static ZEND_FUNCTION(lz4_compress_frame)
                                (int)level,
                                (int)max_block_size,
                                (int)checksums) == FAILURE) {
-        RETVAL_FALSE;
+        RETURN_FALSE;
     }
 #if ZEND_MODULE_API_NO >= 20141001
     RETVAL_STRINGL(output, output_len);
