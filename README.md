@@ -33,6 +33,12 @@ RPM packages of this extension are available in [» Remi's RPM repository](https
 
 DEB packages of this extension are available in [» Ondřej Surý's DEB repository](https://deb.sury.org/) and are named **php-lz4**.
 
+## Installation via PIE
+
+```bash
+pie install kjdev/lz4
+```
+
 
 ## Configuration
 
@@ -42,8 +48,10 @@ php.ini:
 
 ## Function
 
-* lz4\_compress — LZ4 compression
-* lz4\_uncompress — LZ4 decompression
+* lz4\_compress — LZ4 compression (block format)
+* lz4\_uncompress — LZ4 decompression (block format)
+* lz4\_compress\_frame — LZ4 compression (frame format)
+* lz4\_uncompress\_frame — LZ4 decompression (frame format)
 
 ### lz4\_compress — LZ4 compression
 
@@ -98,6 +106,75 @@ LZ4 decompression.
 #### Return Values
 
 Returns the decompressed data or FALSE if an error occurred.
+
+
+### lz4\_compress\_frame — LZ4 compression (frame format)
+
+#### Description
+
+string **lz4\_compress\_frame** ( string _$data_ [ , int _$level_ = 0 , int _$max_block_size_ = 0 , int _$checksums_ = 0 ] )
+
+LZ4 compression to frame.
+
+#### Pameters
+
+* _data_
+
+  The string to compress.
+
+* _level_
+
+  The level of compression (1-12, Recommended values are between 4 and 9).
+  (Default to 0, Not High Compression Mode.)
+
+* _max\_block\_size_
+
+  Maximum uncompressed size of each block.
+
+  * 4 = 64 KB
+  * 5 = 256 KB
+  * 6 = 1 MB
+  * 7 = 4 MB
+  * any other value: 64 KB
+
+* _checksums_
+
+  Enable/disable frame level and block level checksums.
+  The value is a bitmask using this bit interpretation:
+
+  * bit 0: frame level checksum
+  * bit 1: block level checksum
+
+  Which leads to the following:
+
+  * 0 = no checksums
+  * 1 = frame level checksum
+  * 2 = block level checksum
+  * 3 = both checksums
+
+#### Return Values
+
+Returns the compressed data or FALSE if an error occurred.
+
+
+### lz4\_uncompress\_frame — LZ4 decompression (frame format)
+
+#### Description
+
+string **lz4\_uncompress\_frame** ( string _$data_ )
+
+LZ4 decompression from frame.
+
+#### Pameters
+
+* _data_
+
+  The compressed string.
+
+#### Return Values
+
+Returns the decompressed data or FALSE if an error occurred.
+
 
 ## Examples
 
