@@ -130,27 +130,22 @@ LZ4 compression to frame.
 * _max\_block\_size_
 
   Maximum uncompressed size of each block.
+  Pass any of the following values:
 
-  * 4 = 64 KB
-  * 5 = 256 KB
-  * 6 = 1 MB
-  * 7 = 4 MB
-  * any other value: 64 KB
+  * _LZ4\_BLOCK\_SIZE\_64KB_
+  * _LZ4\_BLOCK\_SIZE\_256KB_
+  * _LZ4\_BLOCK\_SIZE\_1MB_
+  * _LZ4\_BLOCK\_SIZE\_4MB_
+  
+  Any other value will be treated as _LZ4\_BLOCK\_SIZE\_64KB_.
 
 * _checksums_
 
   Enable/disable frame level and block level checksums.
-  The value is a bitmask using this bit interpretation:
+  Pass a bitwise combination of the following constants:
 
-  * bit 0: frame level checksum
-  * bit 1: block level checksum
-
-  Which leads to the following:
-
-  * 0 = no checksums
-  * 1 = frame level checksum
-  * 2 = block level checksum
-  * 3 = both checksums
+  * _LZ4\_CHECKSUM\_FRAME_: frame level checksum
+  * _LZ4\_CHECKSUM\_BLOCK_: block level checksum
 
 #### Return Values
 

@@ -67,6 +67,9 @@
 #define PHP_LZ4_CLEVEL_MIN 3
 #endif
 
+#define PHP_LZ4_CHECKSUM_FRAME (1<<0)
+#define PHP_LZ4_CHECKSUM_BLOCK (1<<1)
+
 static ZEND_FUNCTION(lz4_compress);
 static ZEND_FUNCTION(lz4_uncompress);
 static ZEND_FUNCTION(lz4_compress_frame);
@@ -115,6 +118,12 @@ static PHP_MINIT_FUNCTION(lz4)
     REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MAX", PHP_LZ4_CLEVEL_MAX, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("LZ4_VERSION_NUMBER", LZ4_versionNumber(), CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("LZ4_VERSION_TEXT", (char *)LZ4_versionString(), CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_CHECKSUM_FRAME", PHP_LZ4_CHECKSUM_FRAME, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_CHECKSUM_BLOCK", PHP_LZ4_CHECKSUM_BLOCK, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_64KB", LZ4F_max64KB, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_256KB", LZ4F_max256KB, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_1MB", LZ4F_max1MB, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_4MB", LZ4F_max4MB, CONST_CS | CONST_PERSISTENT);
 
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
     apc_register_serializer("lz4",
@@ -294,8 +303,8 @@ static int php_lz4_compress_frame(char* in, const int in_len,
     }
     preferences.frameInfo.blockSizeID = max_block_size;
     preferences.frameInfo.contentSize = in_len;
-    preferences.frameInfo.contentChecksumFlag = checksums & 0x01;
-    preferences.frameInfo.blockChecksumFlag = (checksums & 0x02) >> 1;
+    preferences.frameInfo.contentChecksumFlag = (checksums & PHP_LZ4_CHECKSUM_FRAME) > 0;
+    preferences.frameInfo.blockChecksumFlag = (checksums & PHP_LZ4_CHECKSUM_BLOCK) > 0;
     preferences.compressionLevel = level;
 
     var_len = LZ4F_compressFrameBound(in_len, &preferences);
