@@ -8,7 +8,7 @@ on:
 env:
   PHP_EXT: lz4
   PHP_EXT_VERSION: ${{ github.event.release.tag_name }}
-  BIN_SDK_VER: 2.3.0
+  BIN_SDK_VER: 2.5.0
 
 jobs:
   ci:
@@ -29,8 +29,8 @@ jobs:
           - vs16
           - vs17
         library:
-          - ''
-          - 'vcpkg'
+          - false
+          - true
         exclude:
           - php: '8.4'
             vs: vs16
@@ -49,6 +49,8 @@ jobs:
       ARCH: ${{ matrix.arch }}
       TS: ${{ matrix.ts }}
 
+    if: contains(github.event.head_commit.message, 'ci skip') == false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -58,7 +60,7 @@ jobs:
       - name: Checkout submodule
         run: .\.github\workflows\submodule.ps1
         shell: pwsh
-        if: ${{ matrix.library == '' }}
+        if: ${{ ! matrix.library }}
       - name: Install dependency library
         run: .\.github\workflows\vcpkg.ps1
         shell: pwsh
@@ -89,7 +91,7 @@ jobs:
           REPORT_EXIT_STATUS: 1
           NO_INTERACTION: 1
 
-      - if: ${{ github.event_name == 'release' && matrix.library == '' }}
+      - if: ${{ github.event_name == 'release' && matrix.library == false }}
         name: Archive DLL
         run: |-
           Copy-Item .\php_${{ env.PHP_EXT }}.dll .\$env:EXT_NAME.dll
@@ -98,11 +100,11 @@ jobs:
         env:
           EXT_NAME: php_${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch == 'x64' && 'x86_64' || matrix.arch }}
 
-      - if: ${{ github.event_name == 'release' && matrix.library == '' }}
+      - if: ${{ github.event_name == 'release' && matrix.library == false }}
         name: Store archive DLL
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch == 'x64' && 'x86_64' || matrix.arch }}
+          name: ${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch == 'x64' && 'x86_64' || matrix.arch }}
           path: .\php_${{ env.PHP_EXT }}-${{ env.PHP_EXT_VERSION }}-${{ matrix.php }}-${{ matrix.ts }}-${{ matrix.vs }}-${{ matrix.arch == 'x64' && 'x86_64' || matrix.arch }}.zip
           overwrite: true
 
