@@ -61,7 +61,7 @@ string **lz4\_compress** ( string _$data_ [ , int _$level_ = 0 , string _$extra_
 
 LZ4 compression.
 
-#### Pameters
+#### Parameters
 
 * _data_
 
@@ -89,7 +89,7 @@ string **lz4\_uncompress** ( string _$data_ [ , long _$maxsize_ = -1 , long _$of
 
 LZ4 decompression.
 
-#### Pameters
+#### Parameters
 
 * _data_
 
@@ -116,7 +116,7 @@ string **lz4\_compress\_frame** ( string _$data_ [ , int _$level_ = 0 , int _$ma
 
 LZ4 compression to frame.
 
-#### Pameters
+#### Parameters
 
 * _data_
 
@@ -160,7 +160,7 @@ string **lz4\_uncompress\_frame** ( string _$data_ )
 
 LZ4 decompression from frame.
 
-#### Pameters
+#### Parameters
 
 * _data_
 
