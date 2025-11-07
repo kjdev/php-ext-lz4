@@ -141,11 +141,11 @@ LZ4 compression to frame.
 
 * _checksums_
 
-  Enable/disable frame level and block level checksums.
+  Enable/disable frame-level and block-level checksums.
   Pass a bitwise combination of the following constants:
 
-  * _LZ4\_CHECKSUM\_FRAME_: frame level checksum
-  * _LZ4\_CHECKSUM\_BLOCK_: block level checksum
+  * _LZ4\_CHECKSUM\_FRAME_: frame-level checksum
+  * _LZ4\_CHECKSUM\_BLOCK_: block-level checksum
 
 #### Return Values
 
