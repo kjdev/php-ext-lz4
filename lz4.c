@@ -74,6 +74,8 @@ static ZEND_FUNCTION(lz4_compress);
 static ZEND_FUNCTION(lz4_uncompress);
 static ZEND_FUNCTION(lz4_compress_frame);
 static ZEND_FUNCTION(lz4_uncompress_frame);
+static ZEND_FUNCTION(lz4_compress_raw);
+static ZEND_FUNCTION(lz4_uncompress_raw);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
     ZEND_ARG_INFO(0, data)
@@ -98,6 +100,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_frame, 0, 0, 1)
     ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress_raw, 0, 0, 1)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_INFO(0, level)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_raw, 0, 0, 2)
+    ZEND_ARG_INFO(0, data)
+    ZEND_ARG_INFO(0, max_size)
+ZEND_END_ARG_INFO()
+
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
 static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS);
 static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS);
@@ -108,6 +120,8 @@ static zend_function_entry lz4_functions[] = {
     ZEND_FE(lz4_uncompress, arginfo_lz4_uncompress)
     ZEND_FE(lz4_compress_frame, arginfo_lz4_compress_frame)
     ZEND_FE(lz4_uncompress_frame, arginfo_lz4_uncompress_frame)
+    ZEND_FE(lz4_compress_raw, arginfo_lz4_compress_raw)
+    ZEND_FE(lz4_uncompress_raw, arginfo_lz4_uncompress_raw)
     ZEND_FE_END
 };
 
@@ -276,6 +290,93 @@ static int php_lz4_uncompress(const char* in, const int in_len,
                                    var_len);
     if (*out_len <= 0) {
         zend_error(E_WARNING, "lz4_uncompress : data error");
+        free(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+/**
+ * Raw LZ4 block compression (no size header)
+ * Compatible with Python lz4.block, Rust lz4_flex, Go pierrec/lz4
+ */
+static int php_lz4_compress_raw(char* in, const int in_len,
+                                char** out, int* out_len,
+                                const int level)
+{
+    int max_len;
+
+    /* Calculate maximum compressed size (LZ4 worst-case bound) */
+    max_len = LZ4_compressBound(in_len);
+
+    /* Allocate output buffer (NO header space, just compressed data) */
+    *out = (char*)emalloc(max_len);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_compress_raw : memory error");
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    /* Compress directly into output buffer (no offset) */
+    if (level == 0) {
+        *out_len = LZ4_compress_default(in, *out, in_len, max_len);
+    } else if (level > 0 && level <= PHP_LZ4_CLEVEL_MAX) {
+        *out_len = LZ4_compress_HC(in, *out, in_len, max_len, level);
+    } else {
+        zend_error(E_WARNING,
+                   "lz4_compress_raw: compression level (%d) must be within 1..%d",
+                   level, PHP_LZ4_CLEVEL_MAX);
+        efree(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    /* Check for compression errors */
+    if (*out_len <= 0) {
+        zend_error(E_WARNING, "lz4_compress_raw : compression failed");
+        efree(*out);
+        *out = NULL;
+        *out_len = 0;
+        return FAILURE;
+    }
+
+    /* NOTE: *out_len is the actual compressed size (no header added) */
+    return SUCCESS;
+}
+
+/**
+ * Raw LZ4 block decompression (no size header)
+ * Requires max_size parameter (from ByteStorage envelope)
+ */
+static int php_lz4_uncompress_raw(const char* in, const int in_len,
+                                  const int max_size,
+                                  char** out, int* out_len)
+{
+    /* Validate max_size parameter (required for raw decompression) */
+    if (max_size <= 0) {
+        zend_error(E_WARNING,
+                   "lz4_uncompress_raw : max_size parameter is required and must be positive");
+        return FAILURE;
+    }
+
+    /* Allocate output buffer based on provided max_size */
+    *out = (char*)malloc(max_size + 1);
+    if (!*out) {
+        zend_error(E_WARNING, "lz4_uncompress_raw : memory error");
+        return FAILURE;
+    }
+
+    /* Decompress from start of input (no offset) */
+    *out_len = LZ4_decompress_safe(in, *out, in_len, max_size);
+
+    /* Check decompression result */
+    if (*out_len <= 0) {
+        zend_error(E_WARNING,
+                   "lz4_uncompress_raw : decompression failed (corrupted data or wrong max_size)");
         free(*out);
         *out = NULL;
         *out_len = 0;
@@ -578,6 +679,84 @@ static ZEND_FUNCTION(lz4_uncompress_frame)
         RETURN_FALSE;
     }
 
+#if ZEND_MODULE_API_NO >= 20141001
+    RETVAL_STRINGL(output, output_len);
+#else
+    RETVAL_STRINGL(output, output_len, 1);
+#endif
+
+    free(output);
+}
+
+static ZEND_FUNCTION(lz4_compress_raw)
+{
+    zval *data;
+    char *output;
+    int output_len;
+    long level = 0;
+
+    /* Parse parameters: data (required), level (optional, default 0) */
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+                              "z|l", &data, &level) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    /* Validate data is a string */
+    if (Z_TYPE_P(data) != IS_STRING) {
+        zend_error(E_WARNING,
+                   "lz4_compress_raw : expects parameter to be string.");
+        RETURN_FALSE;
+    }
+
+    /* Call internal compression function */
+    if (php_lz4_compress_raw(Z_STRVAL_P(data), Z_STRLEN_P(data),
+                             &output, &output_len,
+                             (int)level) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    /* Return compressed data */
+#if ZEND_MODULE_API_NO >= 20141001
+    RETVAL_STRINGL(output, output_len);
+#else
+    RETVAL_STRINGL(output, output_len, 1);
+#endif
+
+    efree(output);
+}
+
+static ZEND_FUNCTION(lz4_uncompress_raw)
+{
+    zval *data;
+    int output_len;
+    char *output;
+#if ZEND_MODULE_API_NO >= 20141001
+    zend_long max_size;
+#else
+    long max_size;
+#endif
+
+    /* Parse parameters: data (required), max_size (required) */
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+                              "zl", &data, &max_size) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    /* Validate data is a string */
+    if (Z_TYPE_P(data) != IS_STRING) {
+        zend_error(E_WARNING,
+                   "lz4_uncompress_raw : expects parameter to be string.");
+        RETURN_FALSE;
+    }
+
+    /* Call internal decompression function */
+    if (php_lz4_uncompress_raw(Z_STRVAL_P(data), Z_STRLEN_P(data),
+                               (const int)max_size,
+                               &output, &output_len) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    /* Return decompressed data */
 #if ZEND_MODULE_API_NO >= 20141001
     RETVAL_STRINGL(output, output_len);
 #else
