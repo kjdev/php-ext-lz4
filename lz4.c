@@ -111,6 +111,16 @@ static zend_function_entry lz4_functions[] = {
     ZEND_FE_END
 };
 
+ZEND_DECLARE_MODULE_GLOBALS(lz4);
+
+#if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("lz4.apcu_compression_level",
+                    "0",
+                    PHP_INI_ALL, OnUpdateLong, apcu_compression_level,
+                    zend_lz4_globals, lz4_globals)
+PHP_INI_END()
+#endif
 
 static PHP_MINIT_FUNCTION(lz4)
 {
@@ -130,8 +140,16 @@ static PHP_MINIT_FUNCTION(lz4)
                             APC_SERIALIZER_NAME(lz4),
                             APC_UNSERIALIZER_NAME(lz4),
                             NULL);
+    REGISTER_INI_ENTRIES();
 #endif
+    return SUCCESS;
+}
 
+PHP_MSHUTDOWN_FUNCTION(lz4)
+{
+#if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
+    UNREGISTER_INI_ENTRIES();
+#endif
     return SUCCESS;
 }
 
@@ -145,6 +163,16 @@ ZEND_MINFO_FUNCTION(lz4)
     php_info_print_table_row(2, "LZ4 APCu serializer ABI", APC_SERIALIZER_ABI);
 #endif
     php_info_print_table_end();
+#if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
+    DISPLAY_INI_ENTRIES();
+#endif
+}
+
+ZEND_GINIT_FUNCTION(lz4)
+{
+#if defined(ZTS)
+    ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 }
 
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
@@ -159,20 +187,22 @@ zend_module_entry lz4_module_entry = {
     STANDARD_MODULE_HEADER_EX,
     NULL,
     lz4_module_deps,
-#elif ZEND_MODULE_API_NO >= 20010901
+#else
     STANDARD_MODULE_HEADER,
 #endif
     "lz4",
     lz4_functions,
     PHP_MINIT(lz4),
-    NULL,
+    PHP_MSHUTDOWN(lz4),
     NULL,
     NULL,
     ZEND_MINFO(lz4),
-#if ZEND_MODULE_API_NO >= 20010901
     LZ4_EXT_VERSION,
-#endif
-    STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(lz4),
+    PHP_GINIT(lz4),
+    NULL,
+    NULL,
+    STANDARD_MODULE_PROPERTIES_EX
 };
 
 #ifdef COMPILE_DL_LZ4
@@ -594,6 +624,11 @@ static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS)
     php_serialize_data_t var_hash;
     int out_len, data_size, data_offset = sizeof(int);
     smart_str var = {0};
+    zend_long level = LZ4_G(apcu_compression_level);
+
+    if (level < 0 || level > PHP_LZ4_CLEVEL_MAX) {
+        level = 0;
+    }
 
     PHP_VAR_SERIALIZE_INIT(var_hash);
     php_var_serialize(&var, (zval*) value, &var_hash);
@@ -605,7 +640,7 @@ static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS)
     if (php_lz4_compress(ZSTR_VAL(var.s), ZSTR_LEN(var.s),
                          NULL, 0,
                          (char**)buf, (int*)buf_len,
-                         0) == SUCCESS) {
+                         (int)level) == SUCCESS) {
         result = 1;
     } else {
         result = 0;

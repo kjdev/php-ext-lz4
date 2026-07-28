@@ -41,6 +41,14 @@ extern zend_module_entry lz4_module_entry;
 #include "TSRM.h"
 #endif
 
+ZEND_BEGIN_MODULE_GLOBALS(lz4)
+#if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
+    zend_long apcu_compression_level;
+#else
+    int unused_dummy;
+#endif
+ZEND_END_MODULE_GLOBALS(lz4);
+
 #ifdef ZTS
 #define LZ4_G(v) TSRMG(lz4_globals_id, zend_lz4_globals *, v)
 #else
