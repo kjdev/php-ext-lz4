@@ -168,6 +168,10 @@ ZEND_MINFO_FUNCTION(lz4)
 #endif
 }
 
+#if defined(ZTS)
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
+
 ZEND_GINIT_FUNCTION(lz4)
 {
 #if defined(ZTS)
