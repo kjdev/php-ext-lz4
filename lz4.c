@@ -663,7 +663,7 @@ static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS)
     int var_len, data_size, data_offset = sizeof(int);
     unsigned char* var;
 
-    if (php_lz4_uncompress(buf, (const int)buf_len,
+    if (php_lz4_uncompress((const char *)buf, (const int)buf_len,
                            0, 0,
                            (char**)&var, (int*)&var_len) != SUCCESS) {
         ZVAL_NULL(value);
