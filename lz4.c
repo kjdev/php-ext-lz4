@@ -626,7 +626,6 @@ static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS)
 {
     int result;
     php_serialize_data_t var_hash;
-    int out_len, data_size, data_offset = sizeof(int);
     smart_str var = {0};
     zend_long level = LZ4_G(apcu_compression_level);
 
@@ -660,7 +659,7 @@ static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS)
     const unsigned char* tmp;
     int result;
     php_unserialize_data_t var_hash;
-    int var_len, data_size, data_offset = sizeof(int);
+    int var_len = sizeof(int);
     unsigned char* var;
 
     if (php_lz4_uncompress((const char *)buf, (const int)buf_len,
