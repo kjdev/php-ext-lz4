@@ -66,6 +66,7 @@ if test "$PHP_LZ4" != "no"; then
 
     PHP_ADD_BUILD_DIR($ext_builddir/lz4/lib, 1)
     PHP_ADD_INCLUDE([$ext_srcdir/lz4/lib])
+    AC_DEFINE(HAVE_BUNDLED_LZ4, 1, [Bundled lz4])
   fi
 
   dnl APCu

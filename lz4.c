@@ -156,11 +156,27 @@ PHP_MSHUTDOWN_FUNCTION(lz4)
 ZEND_MINFO_FUNCTION(lz4)
 {
     php_info_print_table_start();
-    php_info_print_table_row(2, "LZ4 support", "enabled");
-    php_info_print_table_row(2, "Extension Version", LZ4_EXT_VERSION);
-    php_info_print_table_row(2, "LZ4 Version", (char *)LZ4_versionString());
+    php_info_print_table_row(2, "Extension version", LZ4_EXT_VERSION);
+#if defined(HAVE_BUNDLED_LZ4)
+    php_info_print_table_row(2, "LZ4 library", "bundled");
+#else
+    php_info_print_table_row(2, "LZ4 library", "external");
+#endif
+    php_info_print_table_row(2, "LZ4 library version", (char *)LZ4_versionString());
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
-    php_info_print_table_row(2, "LZ4 APCu serializer ABI", APC_SERIALIZER_ABI);
+    const char *serializer = zend_ini_string("apc.serializer", sizeof("apc.serializer")-1, 0);
+
+    if (serializer == NULL) {
+        php_info_print_table_row(2, "APCu serializer", "APCu extension not loaded");
+    } else if (strcmp(serializer, "lz4") == 0) {
+        php_info_print_table_row(2, "APCu serializer", "lz4 active");
+    } else {
+        php_info_print_table_row(2, "APCu serializer", "lz4 inactive");
+    }
+
+    php_info_print_table_row(2, "APCu serializer interface version", APC_SERIALIZER_ABI);
+#else
+    php_info_print_table_row(2, "APCu serializer support", "not built");
 #endif
     php_info_print_table_end();
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
