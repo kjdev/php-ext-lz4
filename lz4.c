@@ -306,6 +306,10 @@ static int php_lz4_uncompress(const char* in, const int in_len,
     } else {
         /* Get data length */
         in_offset = sizeof(int);
+        if (in_len < (int)sizeof(int)) {
+            zend_error(E_WARNING, "lz4_uncompress : data error");
+            return FAILURE;
+        }
         memcpy(&var_len, in, in_offset);
     }
 
