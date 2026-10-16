@@ -1,5 +1,5 @@
 /* This is a generated file, edit lz4.stub.php instead.
- * Stub hash: 4c2e81c70627612af2b15c5b3e6e77ba37c3436a */
+ * Stub hash: 54e22d5a69583c7477495099d1d5cd965801f806 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
@@ -18,7 +18,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress_raw, 0, 0, 1)
 	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_raw, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_raw, 0, 0, 2)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, maxsize)
 ZEND_END_ARG_INFO()

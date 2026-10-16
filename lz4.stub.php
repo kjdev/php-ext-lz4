@@ -71,7 +71,7 @@ function lz4_uncompress(string $data, int $maxsize = -1, int $offset = 0): strin
 
 function lz4_compress_raw(string $data, int $level = 0): string|false {}
 
-function lz4_uncompress_raw(string $data, int $maxsize = -1): string|false {}
+function lz4_uncompress_raw(string $data, int $maxsize): string|false {}
 
 /**
 * @param int $max_block_size any of the LZ4_BLOCK_SIZE_* constants

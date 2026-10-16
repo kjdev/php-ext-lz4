@@ -732,9 +732,9 @@ ZEND_FUNCTION(lz4_uncompress_raw)
     int output_len;
     char *output;
 #if ZEND_MODULE_API_NO >= 20141001
-    zend_long max_size = -1;
+    zend_long max_size;
 #else
-    long max_size = -1;
+    long max_size;
 #endif
 
     /* Parse parameters: data (required), max_size (required) */
