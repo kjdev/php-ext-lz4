@@ -70,60 +70,16 @@
 #define PHP_LZ4_CHECKSUM_FRAME (1<<0)
 #define PHP_LZ4_CHECKSUM_BLOCK (1<<1)
 
-static ZEND_FUNCTION(lz4_compress);
-static ZEND_FUNCTION(lz4_uncompress);
-static ZEND_FUNCTION(lz4_compress_frame);
-static ZEND_FUNCTION(lz4_uncompress_frame);
-static ZEND_FUNCTION(lz4_compress_raw);
-static ZEND_FUNCTION(lz4_uncompress_raw);
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
-    ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, level)
-    ZEND_ARG_INFO(0, extra)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress, 0, 0, 1)
-    ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, max)
-    ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress_frame, 0, 0, 1)
-    ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, level)
-    ZEND_ARG_INFO(0, max_block_size)
-    ZEND_ARG_INFO(0, checksums)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_frame, 0, 0, 1)
-    ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress_raw, 0, 0, 1)
-    ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, level)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_raw, 0, 0, 2)
-    ZEND_ARG_INFO(0, data)
-    ZEND_ARG_INFO(0, max_size)
-ZEND_END_ARG_INFO()
+#if PHP_VERSION_ID < 80000
+#include "lz4_legacy_arginfo.h"
+#else
+#include "lz4_arginfo.h"
+#endif
 
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
 static int APC_SERIALIZER_NAME(lz4)(APC_SERIALIZER_ARGS);
 static int APC_UNSERIALIZER_NAME(lz4)(APC_UNSERIALIZER_ARGS);
 #endif
-
-static zend_function_entry lz4_functions[] = {
-    ZEND_FE(lz4_compress, arginfo_lz4_compress)
-    ZEND_FE(lz4_uncompress, arginfo_lz4_uncompress)
-    ZEND_FE(lz4_compress_frame, arginfo_lz4_compress_frame)
-    ZEND_FE(lz4_uncompress_frame, arginfo_lz4_uncompress_frame)
-    ZEND_FE(lz4_compress_raw, arginfo_lz4_compress_raw)
-    ZEND_FE(lz4_uncompress_raw, arginfo_lz4_uncompress_raw)
-    ZEND_FE_END
-};
 
 ZEND_DECLARE_MODULE_GLOBALS(lz4);
 
@@ -138,16 +94,7 @@ PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(lz4)
 {
-    REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MIN", PHP_LZ4_CLEVEL_MIN, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_CLEVEL_MAX", PHP_LZ4_CLEVEL_MAX, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_VERSION_NUMBER", LZ4_versionNumber(), CONST_CS | CONST_PERSISTENT);
-    REGISTER_STRING_CONSTANT("LZ4_VERSION_TEXT", (char *)LZ4_versionString(), CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_CHECKSUM_FRAME", PHP_LZ4_CHECKSUM_FRAME, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_CHECKSUM_BLOCK", PHP_LZ4_CHECKSUM_BLOCK, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_64KB", LZ4F_max64KB, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_256KB", LZ4F_max256KB, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_1MB", LZ4F_max1MB, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LZ4_BLOCK_SIZE_4MB", LZ4F_max4MB, CONST_CS | CONST_PERSISTENT);
+    register_lz4_symbols(module_number);
 
 #if PHP_MAJOR_VERSION >= 7 && defined(HAVE_APCU_SUPPORT)
     apc_register_serializer("lz4",
@@ -225,7 +172,7 @@ zend_module_entry lz4_module_entry = {
     STANDARD_MODULE_HEADER,
 #endif
     "lz4",
-    lz4_functions,
+    ext_functions,
     PHP_MINIT(lz4),
     PHP_MSHUTDOWN(lz4),
     NULL,
@@ -597,7 +544,7 @@ static int php_lz4_uncompress_frame(const char* in, const int in_len,
     return SUCCESS;
 }
 
-static ZEND_FUNCTION(lz4_compress)
+ZEND_FUNCTION(lz4_compress)
 {
     zval *data;
     char *output;
@@ -637,7 +584,7 @@ static ZEND_FUNCTION(lz4_compress)
     efree(output);
 }
 
-static ZEND_FUNCTION(lz4_uncompress)
+ZEND_FUNCTION(lz4_uncompress)
 {
     zval *data;
     int output_len;
@@ -674,7 +621,7 @@ static ZEND_FUNCTION(lz4_uncompress)
     free(output);
 }
 
-static ZEND_FUNCTION(lz4_compress_frame)
+ZEND_FUNCTION(lz4_compress_frame)
 {
     zval *data;
     char *output;
@@ -711,7 +658,7 @@ static ZEND_FUNCTION(lz4_compress_frame)
     efree(output);
 }
 
-static ZEND_FUNCTION(lz4_uncompress_frame)
+ZEND_FUNCTION(lz4_uncompress_frame)
 {
     zval *data;
     unsigned long int output_len;
@@ -742,7 +689,7 @@ static ZEND_FUNCTION(lz4_uncompress_frame)
     free(output);
 }
 
-static ZEND_FUNCTION(lz4_compress_raw)
+ZEND_FUNCTION(lz4_compress_raw)
 {
     zval *data;
     char *output;
@@ -779,7 +726,7 @@ static ZEND_FUNCTION(lz4_compress_raw)
     efree(output);
 }
 
-static ZEND_FUNCTION(lz4_uncompress_raw)
+ZEND_FUNCTION(lz4_uncompress_raw)
 {
     zval *data;
     int output_len;
