@@ -67,7 +67,7 @@ const LZ4_BLOCK_SIZE_4MB = UNKNOWN;
 
 function lz4_compress(string $data, int $level = 0, ?string $extra = NULL): string|false {}
 
-function lz4_uncompress(string $data, int $maxsize = -1, int $offset = -1): string|false {}
+function lz4_uncompress(string $data, int $maxsize = -1, int $offset = 0): string|false {}
 
 function lz4_compress_raw(string $data, int $level = 0): string|false {}
 

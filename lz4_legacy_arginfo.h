@@ -1,5 +1,5 @@
-/* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 03d54affdd7fcf3c083b45557958abe8ae95b353 */
+/* This is a generated file, edit lz4.stub.php instead.
+ * Stub hash: 4c2e81c70627612af2b15c5b3e6e77ba37c3436a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_compress, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
@@ -34,14 +34,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_lz4_uncompress_frame, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(lz4_compress);
 ZEND_FUNCTION(lz4_uncompress);
 ZEND_FUNCTION(lz4_compress_raw);
 ZEND_FUNCTION(lz4_uncompress_raw);
 ZEND_FUNCTION(lz4_compress_frame);
 ZEND_FUNCTION(lz4_uncompress_frame);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(lz4_compress, arginfo_lz4_compress)
