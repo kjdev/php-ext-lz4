@@ -272,6 +272,13 @@ static int php_lz4_uncompress(const char* in, const int in_len,
             return FAILURE;
         }
         memcpy(&var_len, in, in_offset);
+        /* LZ4 block format expands at most ~255x, so a larger declared
+           size can never be valid */
+        if (var_len > 0
+            && (uint64_t)var_len > (uint64_t)(in_len - in_offset) * 255 + 64) {
+            zend_error(E_WARNING, "lz4_uncompress : allocate size error");
+            return FAILURE;
+        }
     }
 
     if (var_len < 0) {
@@ -442,7 +449,7 @@ static size_t get_block_size(const LZ4F_frameInfo_t *frame_info)
     }
 }
 
-static int php_lz4_uncompress_frame(const char* in, const int in_len,
+static int php_lz4_uncompress_frame(const char* in, const size_t in_len,
                                     char** out, unsigned long int* out_len)
 {
     LZ4F_dctx* dctx;
@@ -459,7 +466,8 @@ static int php_lz4_uncompress_frame(const char* in, const int in_len,
         return FAILURE;
     }
 
-    in_size_consumed = LZ4F_HEADER_SIZE_MAX;
+    in_size_consumed = in_len < LZ4F_HEADER_SIZE_MAX
+                       ? in_len : LZ4F_HEADER_SIZE_MAX;
     size_next = LZ4F_getFrameInfo(dctx, &frame_info, in, &in_size_consumed);
     if (LZ4F_isError(size_next)) {
         zend_error(E_WARNING, 
@@ -499,6 +507,9 @@ static int php_lz4_uncompress_frame(const char* in, const int in_len,
         }
 
         in_size_consumed = size_next;
+        if (in_size_consumed > in_len - in_offset) {
+            in_size_consumed = in_len - in_offset;
+        }
         out_size_decompressed = *out_len - out_offset;
 
         size_next = LZ4F_decompress(dctx,
