@@ -13,6 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         php:
+          - '8.6'
           - '8.5'
           - '8.4'
           - '8.3'
@@ -62,6 +63,9 @@ jobs:
       - name: Build
         run: |
           phpize
+          if [ -z "$SED" ]; then
+            export SED=sed
+          fi
           ./configure
           make
         if: ${{ ! matrix.library }}
