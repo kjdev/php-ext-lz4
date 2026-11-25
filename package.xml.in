@@ -29,11 +29,16 @@ ${NOTES}
    <file name="lz4.c" role="src" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
+   <file name="lz4_arginfo.h" role="src" />
+   <file name="lz4_legacy_arginfo.h" role="src" />
    <file name="php_lz4.h" role="src" />
    <file name="php_verdep.h" role="src" />
    <file name="lz4/LICENSE" role="doc" />
    <file name="lz4/lib/lz4.c" role="src" />
    <file name="lz4/lib/lz4.h" role="src" />
+   <file name="lz4/lib/lz4frame.c" role="src" />
+   <file name="lz4/lib/lz4frame.h" role="src" />
+   <file name="lz4/lib/lz4frame_static.h" role="src" />
    <file name="lz4/lib/lz4hc.c" role="src" />
    <file name="lz4/lib/lz4hc.h" role="src" />
    <file name="lz4/lib/xxhash.c" role="src" />
@@ -56,6 +61,13 @@ ${NOTES}
    <file name="tests/data32.txt" role="test" />
    <file name="tests/data64.txt" role="test" />
    <file name="tests/issues_06.phpt" role="test" />
+   <file name="tests/issues_45.phpt" role="test" />
+   <file name="tests/frame_001.phpt" role="test" />
+   <file name="tests/frame_002.phpt" role="test" />
+   <file name="tests/raw_001.phpt" role="test" />
+   <file name="tests/raw_002.phpt" role="test" />
+   <file name="tests/raw_003.phpt" role="test" />
+   <file name="tests/raw_004.phpt" role="test" />
   </dir>
  </contents>
  <dependencies>
